@@ -1,0 +1,9 @@
+body{
+	background-color: #e0e0e0;
+}
+.editor-container{
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
