@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react";
-import styles from "./ToolbarPlugin.module.css";
-import { TbArticle, TbH1, TbH2, TbH3 } from "react-icons/tb";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import {
-	$createParagraphNode,
-	$getSelection,
-	$isRangeSelection,
-} from "lexical";
 import {
 	$createHeadingNode,
 	$isHeadingNode,
 	type HeadingTagType,
 } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
+import {
+	$createParagraphNode,
+	$getSelection,
+	$isRangeSelection,
+} from "lexical";
+import { useEffect, useState } from "react";
+import { TbArticle, TbH1, TbH2, TbH3 } from "react-icons/tb";
+import styles from "./ToolbarPlugin.module.css";
 
 const SupportedBlockType = {
 	paragraph: "Paragraph",
@@ -56,7 +56,7 @@ export const ToolbarPlugin: React.FC = () => {
 				}
 			});
 		});
-	});
+	}, [editor]);
 
 	const format = (headingSize: HeadingTagType | "paragraph") => {
 		if (blockType !== headingSize) {

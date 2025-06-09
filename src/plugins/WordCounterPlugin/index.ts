@@ -1,0 +1,1 @@
+export { WordCounterPlugin } from "./WordCounterPlugin";
