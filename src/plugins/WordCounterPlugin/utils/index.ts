@@ -1,1 +1,1 @@
-export { updateWordCount, type WordCounterPluginProps } from "./WordCounterPluginUtil";
+export { countWords, type WordCounterPluginProps } from "./WordCounterPluginUtil";

@@ -13,15 +13,19 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { type EditorState, type SerializedEditorState } from "lexical";
+import {
+	$getRoot,
+	type EditorState,
+	type SerializedEditorState,
+} from "lexical";
 import { useEffect, useState } from "react";
 import { Note } from "../../core/models";
+import { noteService } from "../../core/services";
 import { useDebounce } from "../../hooks";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
 import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
-import { updateWordCount } from "../../plugins/WordCounterPlugin/utils";
+import { countWords } from "../../plugins/WordCounterPlugin/utils";
 import style from "./Editor.module.css";
-import { noteService } from "../../core/services";
 
 interface EditorProps {
 	selectedNote?: Note | null;
@@ -119,7 +123,9 @@ export const Editor: React.FC<EditorProps> = ({ selectedNote }) => {
 	}, 1000);
 
 	const handleEditorChange = (editorState: EditorState) => {
-		updateWordCount(editorState, setWordCount);
+		setWordCount(
+			countWords(editorState.read(() => $getRoot().getTextContent()))
+		);
 		debouncedUpdateNote(editorState);
 	};
 
@@ -150,48 +156,45 @@ export const Editor: React.FC<EditorProps> = ({ selectedNote }) => {
 	}
 
 	return (
-			<div className={style.editor}>
-				{/* ノートタイトル表示 */}
-				<div className={style.noteHeader}>
-					<input
-						type="text"
-						value={currentNote.title}
-						onChange={(e) => {
-							currentNote.title = e.target.value; // 一時的に更新
-							debouncedUpdateTitle(e.target.value); // デバウンスで保存
-						}}
-						className={style.titleInput}
-						placeholder="ノートのタイトル"
-					/>
-					<div className={style.noteInfo}>
-						<span className={style.lastModified}>
-							最終更新: {currentNote.dateLastModified.toLocaleString("ja-JP")}
-						</span>
-					</div>
+		<div className={style.editor}>
+			{/* ノートタイトル表示 */}
+			<div className={style.noteHeader}>
+				<input
+					type="text"
+					value={currentNote.title}
+					onChange={(e) => {
+						currentNote.title = e.target.value; // 一時的に更新
+						debouncedUpdateTitle(e.target.value); // デバウンスで保存
+					}}
+					className={style.titleInput}
+					placeholder="ノートのタイトル"
+				/>
+				<div className={style.noteInfo}>
+					<span className={style.lastModified}>
+						最終更新: {currentNote.dateLastModified.toLocaleString("ja-JP")}
+					</span>
 				</div>
-
-				<LexicalComposer key={editorKey} initialConfig={initialConfig}>
-					<ToolbarPlugin />
-					<RichTextPlugin
-						contentEditable={<ContentEditable />}
-						placeholder={
-							<div className={style.editorPlaceholder}>
-								ここにテキストを入力してください...
-							</div>
-						}
-						ErrorBoundary={LexicalErrorBoundary}
-					/>
-					<HistoryPlugin />
-					<AutoFocusPlugin />
-					<ListPlugin />
-					<TabIndentationPlugin />
-					<MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-					<OnChangePlugin onChange={handleEditorChange} />
-					<WordCounterPlugin
-						wordCount={wordCount}
-						setWordCount={setWordCount}
-					/>
-				</LexicalComposer>
 			</div>
+
+			<LexicalComposer key={editorKey} initialConfig={initialConfig}>
+				<ToolbarPlugin />
+				<RichTextPlugin
+					contentEditable={<ContentEditable />}
+					placeholder={
+						<div className={style.editorPlaceholder}>
+							ここにテキストを入力してください...
+						</div>
+					}
+					ErrorBoundary={LexicalErrorBoundary}
+				/>
+				<HistoryPlugin />
+				<AutoFocusPlugin />
+				<ListPlugin />
+				<TabIndentationPlugin />
+				<MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+				<OnChangePlugin onChange={handleEditorChange} />
+				<WordCounterPlugin wordCount={wordCount} />
+			</LexicalComposer>
+		</div>
 	);
 };
