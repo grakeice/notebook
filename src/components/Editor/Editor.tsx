@@ -25,82 +25,89 @@ import { useDebounce } from "../../hooks";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
 import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
 import { countWords } from "../../plugins/WordCounterPlugin/utils";
-import style from "./Editor.module.css";
+import styles from "./Editor.module.css";
 
 interface EditorProps {
 	selectedNote?: Note | null;
 	deletedNoteId?: string; // 削除されたノートのIDを追加
 }
 
-export const Editor: React.FC<EditorProps> = ({ selectedNote, deletedNoteId }) => {
-    const [currentNote, setCurrentNote] = useState<Note | null>(null);
-    const [titleValue, setTitleValue] = useState<string>(""); // タイトル用の状態を追加
-    const [wordCount, setWordCount] = useState({ characters: 0, words: 0 });
-    const currentEditorStateRef = useRef<EditorState | null>(null);
-    const previousNoteRef = useRef<Note | null>(null);
-    const lastSavedContentRef = useRef<string | null>(null);
+export const Editor: React.FC<EditorProps> = ({
+	selectedNote,
+	deletedNoteId,
+}) => {
+	const [currentNote, setCurrentNote] = useState<Note | null>(null);
+	const [titleValue, setTitleValue] = useState<string>(""); // タイトル用の状態を追加
+	const [wordCount, setWordCount] = useState({ characters: 0, words: 0 });
+	const currentEditorStateRef = useRef<EditorState | null>(null);
+	const previousNoteRef = useRef<Note | null>(null);
+	const lastSavedContentRef = useRef<string | null>(null);
 
-    // selectedNoteが変わったときの処理
-    useEffect(() => {
-        console.log(`Selected note has changed to: ${selectedNote?.ID}`);
-        
-        // 新しいノートの最後に保存したコンテンツを記録
-        if (selectedNote) {
-            lastSavedContentRef.current = JSON.stringify(selectedNote.content);
-            setTitleValue(selectedNote.title); // タイトル状態を更新
-        } else {
-            lastSavedContentRef.current = null;
-            setTitleValue(""); // タイトル状態をリセット
-        }
-    }, [selectedNote]);
-    
-    useEffect(() => {
-        // 前のノートを保存
-        const savePreviousNote = async () => {
-            if (previousNoteRef.current && currentEditorStateRef.current) {
-                // 削除されたノートは保存しない
-                if (deletedNoteId && previousNoteRef.current.ID === deletedNoteId) {
-                    console.log(`Skipping save for deleted note: ${deletedNoteId}`);
-                    return;
-                }
+	// selectedNoteが変わったときの処理
+	useEffect(() => {
+		console.log(`Selected note has changed to: ${selectedNote?.ID}`);
 
-                // 差分チェック
-                const currentContent = JSON.stringify(currentEditorStateRef.current.toJSON());
-                const savedContent = JSON.stringify(previousNoteRef.current.content);
-                
-                if (currentContent === savedContent) {
-                    console.log(`No changes detected for note: ${previousNoteRef.current.ID}`);
-                    return;
-                }
+		// 新しいノートの最後に保存したコンテンツを記録
+		if (selectedNote) {
+			lastSavedContentRef.current = JSON.stringify(selectedNote.content);
+			setTitleValue(selectedNote.title); // タイトル状態を更新
+		} else {
+			lastSavedContentRef.current = null;
+			setTitleValue(""); // タイトル状態をリセット
+		}
+	}, [selectedNote]);
 
-                try {
-                    previousNoteRef.current.updateContent(
-                        currentEditorStateRef.current.toJSON()
-                    );
-                    const prevID = previousNoteRef.current.ID;
-                    await noteService.saveNote(previousNoteRef.current);
-                    console.log(`Previous note saved successfully. (ID: ${prevID})`);
-                } catch (error) {
-                    console.error("Failed to save previous note:", error);
-                }
-            }
-        };
+	useEffect(() => {
+		// 前のノートを保存
+		const savePreviousNote = async () => {
+			if (previousNoteRef.current && currentEditorStateRef.current) {
+				// 削除されたノートは保存しない
+				if (deletedNoteId && previousNoteRef.current.ID === deletedNoteId) {
+					console.log(`Skipping save for deleted note: ${deletedNoteId}`);
+					return;
+				}
 
-        if (selectedNote?.ID !== currentNote?.ID) {
-            savePreviousNote();
-        }
+				// 差分チェック
+				const currentContent = JSON.stringify(
+					currentEditorStateRef.current.toJSON()
+				);
+				const savedContent = JSON.stringify(previousNoteRef.current.content);
 
-        // 現在のノートを更新
-        previousNoteRef.current = currentNote;
-        if (selectedNote) {
-            setCurrentNote(selectedNote);
-        } else if (selectedNote === null) {
-            setCurrentNote(null);
-        }
-    }, [selectedNote, currentNote, deletedNoteId]);
+				if (currentContent === savedContent) {
+					console.log(
+						`No changes detected for note: ${previousNoteRef.current.ID}`
+					);
+					return;
+				}
 
-    // エディターステートの妥当性をチェックする関数
-    const getValidEditorState = (
+				try {
+					previousNoteRef.current.updateContent(
+						currentEditorStateRef.current.toJSON()
+					);
+					const prevID = previousNoteRef.current.ID;
+					await noteService.saveNote(previousNoteRef.current);
+					console.log(`Previous note saved successfully. (ID: ${prevID})`);
+				} catch (error) {
+					console.error("Failed to save previous note:", error);
+				}
+			}
+		};
+
+		if (selectedNote?.ID !== currentNote?.ID) {
+			savePreviousNote();
+		}
+
+		// 現在のノートを更新
+		previousNoteRef.current = currentNote;
+		if (selectedNote) {
+			setCurrentNote(selectedNote);
+		} else if (selectedNote === null) {
+			setCurrentNote(null);
+		}
+	}, [selectedNote, currentNote, deletedNoteId]);
+
+	// エディターステートの妥当性をチェックする関数
+	const getValidEditorState = (
 		content: SerializedEditorState | Record<string, unknown> | undefined
 	): string | undefined => {
 		if (!content) return undefined;
@@ -161,27 +168,27 @@ export const Editor: React.FC<EditorProps> = ({ selectedNote, deletedNoteId }) =
 	};
 
 	const debouncedUpdateNote = useDebounce(async (editorState: EditorState) => {
-        if (!currentNote) return;
+		if (!currentNote) return;
 
-        // 差分チェック
-        const currentContent = JSON.stringify(editorState.toJSON());
-        if (currentContent === lastSavedContentRef.current) {
-            console.log(`No changes detected for current note: ${currentNote.ID}`);
-            return;
-        }
+		// 差分チェック
+		const currentContent = JSON.stringify(editorState.toJSON());
+		if (currentContent === lastSavedContentRef.current) {
+			console.log(`No changes detected for current note: ${currentNote.ID}`);
+			return;
+		}
 
-        try {
-            currentNote.updateContent(editorState.toJSON());
-            await noteService.saveNote(currentNote);
-            // 保存成功したら最後に保存したコンテンツを更新
-            lastSavedContentRef.current = currentContent;
-            console.log(`Note saved successfully: ${currentNote.ID}`);
-        } catch (error) {
-            console.error("Failed to save note:", error);
-        }
-    }, 1000);
+		try {
+			currentNote.updateContent(editorState.toJSON());
+			await noteService.saveNote(currentNote);
+			// 保存成功したら最後に保存したコンテンツを更新
+			lastSavedContentRef.current = currentContent;
+			console.log(`Note saved successfully: ${currentNote.ID}`);
+		} catch (error) {
+			console.error("Failed to save note:", error);
+		}
+	}, 1000);
 
-    const handleEditorChange = (editorState: EditorState) => {
+	const handleEditorChange = (editorState: EditorState) => {
 		currentEditorStateRef.current = editorState; // refに保存
 		setWordCount(
 			countWords(editorState.read(() => $getRoot().getTextContent()))
@@ -191,77 +198,77 @@ export const Editor: React.FC<EditorProps> = ({ selectedNote, deletedNoteId }) =
 
 	// タイトル変更のデバウンス
 	const debouncedUpdateTitle = useDebounce(async (title: string) => {
-        if (!currentNote) return;
+		if (!currentNote) return;
 
-        // タイトルの差分チェック
-        if (title === currentNote.title) {
-            console.log(`No title change detected for note: ${currentNote.ID}`);
-            return;
-        }
+		// タイトルの差分チェック
+		if (title === currentNote.title) {
+			console.log(`No title change detected for note: ${currentNote.ID}`);
+			return;
+		}
 
-        try {
-            currentNote.updateTitle(title);
-            await noteService.saveNote(currentNote);
-            console.log(`Title updated successfully: ${currentNote.ID}`);
-        } catch (error) {
-            console.error("Failed to save title:", error);
-        }
-    }, 500);
+		try {
+			currentNote.updateTitle(title);
+			await noteService.saveNote(currentNote);
+			console.log(`Title updated successfully: ${currentNote.ID}`);
+		} catch (error) {
+			console.error("Failed to save title:", error);
+		}
+	}, 500);
 
-    // currentNoteがない場合の表示
-    if (!currentNote) {
-        return (
-            <div className={style.editor}>
-                <div className={style.placeholder}>
-                    <h2>ノートを選択してください</h2>
-                    <p>
-                        左のサイドバーからノートを選択するか、新しいノートを作成してください。
-                    </p>
-                </div>
-            </div>
-        );
-    }
+	// currentNoteがない場合の表示
+	if (!currentNote) {
+		return (
+			<div className={styles.editor}>
+				<div className={styles.placeholder}>
+					<h2>ノートを選択してください</h2>
+					<p>
+						左のサイドバーからノートを選択するか、新しいノートを作成してください。
+					</p>
+				</div>
+			</div>
+		);
+	}
 
-    return (
-        <div className={style.editor}>
-            {/* ノートタイトル表示 */}
-            <div className={style.noteHeader}>
-                <input
-                    type="text"
-                    value={titleValue} // 状態を使用
-                    onChange={(e) => {
-                        setTitleValue(e.target.value); // 状態を更新
-                        debouncedUpdateTitle(e.target.value); // デバウンスで保存
-                    }}
-                    className={style.titleInput}
-                    placeholder="ノートのタイトル"
-                />
-                <div className={style.noteInfo}>
-                    <span className={style.lastModified}>
-                        最終更新: {currentNote.dateLastModified.toLocaleString("ja-JP")}
-                    </span>
-                </div>
-            </div>
+	return (
+		<div className={styles.editor}>
+			{/* ノートタイトル表示 */}
+			<div className={styles.noteHeader}>
+				<input
+					type="text"
+					value={titleValue} // 状態を使用
+					onChange={(e) => {
+						setTitleValue(e.target.value); // 状態を更新
+						debouncedUpdateTitle(e.target.value); // デバウンスで保存
+					}}
+					className={styles.titleInput}
+					placeholder="ノートのタイトル"
+				/>
+				<div className={styles.noteInfo}>
+					<span className={styles.lastModified}>
+						最終更新: {currentNote.dateLastModified.toLocaleString("ja-JP")}
+					</span>
+				</div>
+			</div>
 
-            <LexicalComposer key={currentNote.ID} initialConfig={initialConfig}>
-                <ToolbarPlugin />
-                <RichTextPlugin
-                    contentEditable={<ContentEditable />}
-                    // placeholder={
-                    // 	<div className={style.editorPlaceholder}>
-                    // 		ここにテキストを入力してください...
-                    // 	</div>
-                    // }
-                    ErrorBoundary={LexicalErrorBoundary}
-                />
-                <HistoryPlugin />
-                <AutoFocusPlugin />
-                <ListPlugin />
-                <TabIndentationPlugin />
-                <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-                <OnChangePlugin onChange={handleEditorChange} />
-                <WordCounterPlugin wordCount={wordCount} />
-            </LexicalComposer>
-        </div>
-    );
+			<LexicalComposer key={currentNote.ID} initialConfig={initialConfig}>
+				<ToolbarPlugin />
+				<RichTextPlugin
+					contentEditable={<ContentEditable />}
+					// placeholder={
+					// 	<div className={styles.editorPlaceholder}>
+					// 		ここにテキストを入力してください...
+					// 	</div>
+					// }
+					ErrorBoundary={LexicalErrorBoundary}
+				/>
+				<HistoryPlugin />
+				<AutoFocusPlugin />
+				<ListPlugin />
+				<TabIndentationPlugin />
+				<MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+				<OnChangePlugin onChange={handleEditorChange} />
+				<WordCounterPlugin wordCount={wordCount} />
+			</LexicalComposer>
+		</div>
+	);
 };

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Editor } from "./components/Editor/Editor";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Note } from "./core/models/Note";
-import style from "./App.module.css";
+import styles from "./App.module.css";
 
 export const App: React.FC = () => {
 	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -19,7 +19,7 @@ export const App: React.FC = () => {
 	};
 
 	return (
-		<div className={style["editor-container"]}>
+		<div className={styles["editor-container"]}>
 			<Sidebar
 				onNoteSelect={handleNoteSelect}
 				selectedNoteId={selectedNote?.ID}
