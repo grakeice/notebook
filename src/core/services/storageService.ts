@@ -52,19 +52,19 @@ export class StorageService {
 	async save(key: string, data: unknown): Promise<void> {
 		try {
 			const db = await this.initDB();
-			
+
 			// 既存アイテムの取得用トランザクション
 			const readTransaction = db.transaction([this.storeName], "readonly");
 			const readStore = readTransaction.objectStore(this.storeName);
-			
+
 			const existingItem = await new Promise<StorageItem | null>((resolve) => {
 				const request = readStore.get(key);
-				
+
 				request.onsuccess = () => {
 					const result = request.result as StorageItem | undefined;
 					resolve(result || null);
 				};
-				
+
 				request.onerror = () => {
 					resolve(null); // エラーの場合は新規作成として扱う
 				};
@@ -88,10 +88,12 @@ export class StorageService {
 				request.onsuccess = () => resolve();
 				request.onerror = () =>
 					reject(new Error(`Failed to save item: ${request.error?.message}`));
-				
+
 				// トランザクションのエラーハンドリングも追加
 				writeTransaction.onerror = () =>
-					reject(new Error(`Transaction failed: ${writeTransaction.error?.message}`));
+					reject(
+						new Error(`Transaction failed: ${writeTransaction.error?.message}`)
+					);
 			});
 		} catch (error) {
 			console.error("StorageService save error:", error);

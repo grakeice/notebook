@@ -1,14 +1,20 @@
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { Editor } from "./components/Editor/Editor";
 import { Sidebar } from "./components/Sidebar/Sidebar";
 import { Note } from "./core/models/Note";
 import style from "./App.module.css";
 
-
 export const App: React.FC = () => {
 	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
+	const [deletedNoteId, setDeletedNoteId] = useState<string | undefined>();
 
-	const handleNoteSelect = (note: Note) => {
+	const handleNoteDeleted = (noteId: string) => {
+		setDeletedNoteId(noteId);
+		// 少し後にリセット（保存処理が完了するまで）
+		setTimeout(() => setDeletedNoteId(undefined), 100);
+	};
+
+	const handleNoteSelect = (note: Note | null) => {
 		setSelectedNote(note);
 	};
 
@@ -16,11 +22,10 @@ export const App: React.FC = () => {
 		<div className={style["editor-container"]}>
 			<Sidebar
 				onNoteSelect={handleNoteSelect}
-				selectedNoteId={selectedNote?.id}
+				selectedNoteId={selectedNote?.ID}
+				onNoteDeleted={handleNoteDeleted}
 			/>
-			<Suspense>
-				<Editor selectedNote={selectedNote} />
-			</Suspense>
+			<Editor selectedNote={selectedNote} deletedNoteId={deletedNoteId} />
 		</div>
 	);
 };

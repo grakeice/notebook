@@ -1,5 +1,5 @@
 export interface INote {
-	readonly id: string;
+	readonly ID: string;
 	title: string;
 	content: object;
 	readonly dateCreated: Date;
@@ -7,23 +7,26 @@ export interface INote {
 }
 
 export class Note implements INote {
-	readonly id: string = crypto.randomUUID();
+	readonly ID: string;
 	title: string;
 	content: object;
 	readonly dateCreated: Date;
 	dateLastModified: Date;
 
 	constructor({
+		ID,
 		title,
 		content,
 		dateCreated,
 		dateLastModified,
 	}: {
+		ID?: string;
 		title?: string;
 		content?: object;
 		dateCreated?: Date;
 		dateLastModified?: Date;
 	}) {
+		this.ID = ID ?? crypto.randomUUID();
 		this.title = title ?? "";
 		this.content = content ?? {};
 		this.dateCreated = dateCreated ?? new Date();
@@ -42,7 +45,7 @@ export class Note implements INote {
 
 	toJSON(): Record<string, unknown> {
 		return {
-			id: this.id,
+			ID: this.ID,
 			title: this.title,
 			content: this.content,
 			dateCreated: this.dateCreated.toISOString(),
@@ -52,6 +55,7 @@ export class Note implements INote {
 
 	static fromJSON(data: Record<string, unknown>): Note {
 		const note = new Note({
+			ID: data.ID as string,
 			title: data.title as string,
 			content: data.content as object,
 			dateCreated: new Date(data.dateCreated as string),
