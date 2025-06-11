@@ -48,13 +48,6 @@
 	outline: none;
 }
 
-.titleInput:focus {
-	background-color: white;
-	border-radius: 4px;
-	padding: 0.5rem;
-	box-shadow: 0 0 0 2px #007bff;
-}
-
 .noteInfo {
 	display: flex;
 	justify-content: space-between;
@@ -78,7 +71,8 @@
 	overflow: auto;
 	padding: 1rem 1.5rem;
 	line-height: 1.6;
-	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+		sans-serif;
 }
 
 .editor :global([data-lexical-editor]):focus {
