@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 grakeice
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
@@ -22,6 +22,7 @@ import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import {
 	$getRoot,
+	$getSelection,
 	type EditorState,
 	type SerializedEditorState,
 } from "lexical";
@@ -197,9 +198,14 @@ export const Editor: React.FC<EditorProps> = ({
 
 	const handleEditorChange = (editorState: EditorState) => {
 		currentEditorStateRef.current = editorState; // refに保存
-		setWordCount(
-			countWords(editorState.read(() => $getRoot().getTextContent()))
-		);
+		editorState.read(() => {
+			const selection = $getSelection();
+			if (selection?.getTextContent() !== "" && selection) {
+				setWordCount(countWords(selection.getTextContent()));
+			} else {
+				setWordCount(countWords($getRoot().getTextContent()));
+			}
+		});
 		debouncedUpdateNote(editorState);
 	};
 
