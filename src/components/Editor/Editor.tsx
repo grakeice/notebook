@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 grakeice
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
@@ -22,13 +22,14 @@ import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import {
 	$getRoot,
+	$getSelection,
 	type EditorState,
 	type SerializedEditorState,
 } from "lexical";
 import { useEffect, useRef, useState } from "react";
+import { useDebounce } from "react-use";
 import { Note } from "../../core/models";
 import { noteService } from "../../core/services";
-import { useDebounce } from "../../hooks";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
 import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
 import { countWords } from "../../plugins/WordCounterPlugin/utils";
@@ -48,18 +49,13 @@ export const Editor: React.FC<EditorProps> = ({
 	const [wordCount, setWordCount] = useState({ characters: 0, words: 0 });
 	const currentEditorStateRef = useRef<EditorState | null>(null);
 	const previousNoteRef = useRef<Note | null>(null);
-	const lastSavedContentRef = useRef<string | null>(null);
 
 	// selectedNoteが変わったときの処理
 	useEffect(() => {
 		console.log(`Selected note has changed to: ${selectedNote?.ID}`);
-
-		// 新しいノートの最後に保存したコンテンツを記録
 		if (selectedNote) {
-			lastSavedContentRef.current = JSON.stringify(selectedNote.content);
 			setTitleValue(selectedNote.title); // タイトル状態を更新
 		} else {
-			lastSavedContentRef.current = null;
 			setTitleValue(""); // タイトル状態をリセット
 		}
 	}, [selectedNote]);
@@ -74,26 +70,16 @@ export const Editor: React.FC<EditorProps> = ({
 					return;
 				}
 
-				// 差分チェック
-				const currentContent = JSON.stringify(
-					currentEditorStateRef.current.toJSON()
-				);
-				const savedContent = JSON.stringify(previousNoteRef.current.content);
-
-				if (currentContent === savedContent) {
-					console.log(
-						`No changes detected for note: ${previousNoteRef.current.ID}`
-					);
-					return;
-				}
-
 				try {
 					previousNoteRef.current.updateContent(
 						currentEditorStateRef.current.toJSON()
 					);
-					const prevID = previousNoteRef.current.ID;
-					await noteService.saveNote(previousNoteRef.current);
-					console.log(`Previous note saved successfully. (ID: ${prevID})`);
+					const message = await noteService.saveNoteIfChanged(
+						previousNoteRef.current
+					);
+					console.log(
+						`ID: ${message.id}\nSaved: ${message.saved}\nReason: ${message.reason}`
+					);
 				} catch (error) {
 					console.error("Failed to save previous note:", error);
 				}
@@ -174,53 +160,60 @@ export const Editor: React.FC<EditorProps> = ({
 			: undefined,
 	};
 
-	const debouncedUpdateNote = useDebounce(async (editorState: EditorState) => {
-		if (!currentNote) return;
+	useDebounce(
+		async () => {
+			const editorState = currentEditorStateRef.current;
+			if (!currentNote || !editorState) return;
 
-		// 差分チェック
-		const currentContent = JSON.stringify(editorState.toJSON());
-		if (currentContent === lastSavedContentRef.current) {
-			console.log(`No changes detected for current note: ${currentNote.ID}`);
-			return;
-		}
-
-		try {
-			currentNote.updateContent(editorState.toJSON());
-			await noteService.saveNote(currentNote);
-			// 保存成功したら最後に保存したコンテンツを更新
-			lastSavedContentRef.current = currentContent;
-			console.log(`Note saved successfully: ${currentNote.ID}`);
-		} catch (error) {
-			console.error("Failed to save note:", error);
-		}
-	}, 1000);
+			try {
+				currentNote.updateContent(editorState.toJSON());
+				const message = await noteService.saveNoteIfChanged(currentNote);
+				console.log(
+					`ID: ${message.id}\nSaved: ${message.saved}\nReason: ${message.reason}`
+				);
+			} catch (error) {
+				console.error("Failed to save note:", error);
+			}
+		},
+		10000,
+		[currentEditorStateRef.current]
+	);
 
 	const handleEditorChange = (editorState: EditorState) => {
 		currentEditorStateRef.current = editorState; // refに保存
-		setWordCount(
-			countWords(editorState.read(() => $getRoot().getTextContent()))
-		);
-		debouncedUpdateNote(editorState);
+		editorState.read(() => {
+			const selection = $getSelection();
+			if (selection?.getTextContent() !== "" && selection) {
+				setWordCount(countWords(selection.getTextContent()));
+			} else {
+				setWordCount(countWords($getRoot().getTextContent()));
+			}
+		});
 	};
 
 	// タイトル変更のデバウンス
-	const debouncedUpdateTitle = useDebounce(async (title: string) => {
-		if (!currentNote) return;
+	useDebounce(
+		async () => {
+			const title = titleValue;
+			if (!currentNote) return;
 
-		// タイトルの差分チェック
-		if (title === currentNote.title) {
-			console.log(`No title change detected for note: ${currentNote.ID}`);
-			return;
-		}
+			// タイトルの差分チェック
+			if (title === currentNote.title) {
+				console.log(`No title change detected for note: ${currentNote.ID}`);
+				return;
+			}
 
-		try {
-			currentNote.updateTitle(title);
-			await noteService.saveNote(currentNote);
-			console.log(`Title updated successfully: ${currentNote.ID}`);
-		} catch (error) {
-			console.error("Failed to save title:", error);
-		}
-	}, 500);
+			try {
+				currentNote.updateTitle(title);
+				await noteService.saveNote(currentNote);
+				console.log(`Title updated successfully: ${currentNote.ID}`);
+			} catch (error) {
+				console.error("Failed to save title:", error);
+			}
+		},
+		1000,
+		[titleValue]
+	);
 
 	// currentNoteがない場合の表示
 	if (!currentNote) {
@@ -245,7 +238,6 @@ export const Editor: React.FC<EditorProps> = ({
 					value={titleValue} // 状態を使用
 					onChange={(e) => {
 						setTitleValue(e.target.value); // 状態を更新
-						debouncedUpdateTitle(e.target.value); // デバウンスで保存
 					}}
 					className={styles.titleInput}
 					placeholder="ノートのタイトル"
@@ -261,11 +253,6 @@ export const Editor: React.FC<EditorProps> = ({
 				<ToolbarPlugin />
 				<RichTextPlugin
 					contentEditable={<ContentEditable />}
-					// placeholder={
-					// 	<div className={styles.editorPlaceholder}>
-					// 		ここにテキストを入力してください...
-					// 	</div>
-					// }
 					ErrorBoundary={LexicalErrorBoundary}
 				/>
 				<HistoryPlugin />
