@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2025 grakeice
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 import { useState } from "react";
 import { Editor } from "./components/Editor/Editor";
 import { Sidebar } from "./components/Sidebar/Sidebar";

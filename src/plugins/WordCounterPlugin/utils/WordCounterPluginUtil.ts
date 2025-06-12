@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2025 grakeice
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 export type WordCounterPluginProps = {
 	wordCount: { characters: number; words: number };
 };

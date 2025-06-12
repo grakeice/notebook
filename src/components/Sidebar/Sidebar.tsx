@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2025 grakeice
+ * 
+ * This software is released under the MIT License.
+ * https://opensource.org/licenses/MIT
+ */
+
 import { useEffect, useState } from "react";
 import { Note } from "../../core/models/Note";
 import { noteService } from "../../core/services/noteService";
