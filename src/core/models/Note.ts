@@ -56,7 +56,19 @@ export class Note implements INote {
 			const content = this.content as {
 				root: { children: Array<{ children: Array<{ text: string }> }> };
 			};
+
+			// より安全な型チェックを追加
+			if (!content?.root?.children?.[0]?.children) {
+				return "";
+			}
+
 			const textContent = content.root.children[0].children
+				.filter(
+					(child) =>
+						typeof child === "object" &&
+						"text" in child &&
+						typeof child.text === "string"
+				)
 				.map((v) => v.text)
 				.join("");
 

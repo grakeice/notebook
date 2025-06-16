@@ -57,54 +57,68 @@ export class StorageService {
 	}
 
 	async save(key: string, data: unknown): Promise<void> {
+		const maxRetries = 3;
 		try {
-			const db = await this.initDB();
+			// リトライ機能を追加
+			let retryCount = 0;
 
-			// 既存アイテムの取得用トランザクション
-			const readTransaction = db.transaction([this.storeName], "readonly");
-			const readStore = readTransaction.objectStore(this.storeName);
+			while (retryCount < maxRetries) {
+				try {
+					const db = await this.initDB();
 
-			const existingItem = await new Promise<StorageItem | null>((resolve) => {
-				const request = readStore.get(key);
+					// 既存アイテムの取得用トランザクション
+					const readTransaction = db.transaction([this.storeName], "readonly");
+					const readStore = readTransaction.objectStore(this.storeName);
 
-				request.onsuccess = () => {
-					const result = request.result as StorageItem | undefined;
-					resolve(result || null);
-				};
+					const existingItem = await new Promise<StorageItem | null>((resolve) => {
+						const request = readStore.get(key);
 
-				request.onerror = () => {
-					resolve(null); // エラーの場合は新規作成として扱う
-				};
-			});
+						request.onsuccess = () => {
+							const result = request.result as StorageItem | undefined;
+							resolve(result || null);
+						};
 
-			// 書き込み用の新しいトランザクション
-			const writeTransaction = db.transaction([this.storeName], "readwrite");
-			const writeStore = writeTransaction.objectStore(this.storeName);
+						request.onerror = () => {
+							resolve(null); // エラーの場合は新規作成として扱う
+						};
+					});
 
-			const now = new Date();
-			const item: StorageItem = {
-				id: key,
-				data,
-				createdAt: existingItem ? existingItem.createdAt : now,
-				updatedAt: now,
-			};
+					// 書き込み用の新しいトランザクション
+					const writeTransaction = db.transaction([this.storeName], "readwrite");
+					const writeStore = writeTransaction.objectStore(this.storeName);
 
-			return new Promise((resolve, reject) => {
-				const request = writeStore.put(item);
+					const now = new Date();
+					const item: StorageItem = {
+						id: key,
+						data,
+						createdAt: existingItem ? existingItem.createdAt : now,
+						updatedAt: now,
+					};
 
-				request.onsuccess = () => resolve();
-				request.onerror = () =>
-					reject(new Error(`Failed to save item: ${request.error?.message}`));
+					return new Promise((resolve, reject) => {
+						const request = writeStore.put(item);
 
-				// トランザクションのエラーハンドリングも追加
-				writeTransaction.onerror = () =>
-					reject(
-						new Error(`Transaction failed: ${writeTransaction.error?.message}`)
-					);
-			});
+						request.onsuccess = () => resolve();
+						request.onerror = () =>
+							reject(new Error(`Failed to save item: ${request.error?.message}`));
+
+						// トランザクションのエラーハンドリングも追加
+						writeTransaction.onerror = () =>
+							reject(
+								new Error(`Transaction failed: ${writeTransaction.error?.message}`)
+							);
+					});
+				} catch (error) {
+					retryCount++;
+					if (retryCount >= maxRetries) {
+						throw error;
+					}
+					await new Promise((resolve) => setTimeout(resolve, 100 * retryCount));
+				}
+			}
 		} catch (error) {
 			console.error("StorageService save error:", error);
-			throw error;
+			throw new Error(`Failed to save after ${maxRetries} attempts: ${error}`);
 		}
 	}
 

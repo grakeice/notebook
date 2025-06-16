@@ -30,11 +30,11 @@ import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "react-use";
 import { Note } from "../../core/models";
 import { noteService } from "../../core/services";
+import { EditorHeaderPlugin } from "../../plugins/EditorHeaderPlugin";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
 import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
 import { countWords } from "../../plugins/WordCounterPlugin/utils";
 import styles from "./Editor.module.css";
-import { EditorHeaderPlugin } from "../../plugins/EditorHeaderPlugin";
 
 interface EditorProps {
 	selectedNote?: Note | null;

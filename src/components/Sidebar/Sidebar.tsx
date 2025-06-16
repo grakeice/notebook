@@ -5,7 +5,7 @@
  * https://opensource.org/licenses/MIT
  */
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Note } from "../../core/models/Note";
 import { noteService } from "../../core/services/noteService";
 import styles from "./Sidebar.module.css";
@@ -41,48 +41,54 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 		loadNotes();
 	}, []);
 
+	// メモ化によるパフォーマンス改善
+	const memoizedNotes = useMemo(() => notes, [notes]);
+
 	// ノート削除
-	const handleDeleteNote = async (noteId: string, event: React.MouseEvent) => {
-		event.stopPropagation(); // ノート選択を防ぐ
+	const handleDeleteNote = useCallback(
+		async (noteId: string, event: React.MouseEvent) => {
+			event.stopPropagation(); // ノート選択を防ぐ
 
-		if (window.confirm("このノートを削除してもよろしいですか？")) {
-			try {
-				// 削除するノートが現在選択中のノートかどうかをチェック
-				const isSelectedNote = props.selectedNoteId === noteId;
+			if (window.confirm("このノートを削除してもよろしいですか？")) {
+				try {
+					// 削除するノートが現在選択中のノートかどうかをチェック
+					const isSelectedNote = props.selectedNoteId === noteId;
 
-				// 削除前に親コンポーネントに通知
-				props.onNoteDeleted?.(noteId);
+					// 削除前に親コンポーネントに通知
+					props.onNoteDeleted?.(noteId);
 
-				// 削除したノートが選択中だった場合、別のノートを選択
-				if (isSelectedNote) {
-					// 削除予定のノート以外のノートから最初のものを選択
-					const remainingNotes = notes.filter((note) => note.ID !== noteId);
+					// 削除したノートが選択中だった場合、別のノートを選択
+					if (isSelectedNote) {
+						// 削除予定のノート以外のノートから最初のものを選択
+						const remainingNotes = notes.filter((note) => note.ID !== noteId);
 
-					if (remainingNotes.length > 0) {
-						props.onNoteSelect?.(remainingNotes[0]);
-					} else {
-						// ノートが一つもない場合は選択を解除
-						props.onNoteSelect?.(null);
+						if (remainingNotes.length > 0) {
+							props.onNoteSelect?.(remainingNotes[0]);
+						} else {
+							// ノートが一つもない場合は選択を解除
+							props.onNoteSelect?.(null);
+						}
 					}
+
+					// APIでノートを削除
+					await noteService.deleteNote(noteId);
+					console.log(`ノートの削除に成功しました ID:${noteId}`);
+
+					// 成功した場合のみローカルの配列からも削除
+					setNotes((prevNotes) => prevNotes.filter((note) => note.ID !== noteId));
+				} catch (err) {
+					console.error("Failed to delete note:", err);
+					alert("ノートの削除に失敗しました");
+					// エラーの場合は配列を更新しない、または再読み込み
+					await loadNotes();
 				}
-
-				// APIでノートを削除
-				await noteService.deleteNote(noteId);
-				console.log(`ノートの削除に成功しました ID:${noteId}`);
-
-				// 成功した場合のみローカルの配列からも削除
-				setNotes((prevNotes) => prevNotes.filter((note) => note.ID !== noteId));
-			} catch (err) {
-				console.error("Failed to delete note:", err);
-				alert("ノートの削除に失敗しました");
-				// エラーの場合は配列を更新しない、または再読み込み
-				await loadNotes();
 			}
-		}
-	};
+		},
+		[props, notes]
+	);
 
 	// 新しいノート作成
-	const handleCreateNewNote = async () => {
+	const handleCreateNewNote = useCallback(async () => {
 		const newNote = new Note({});
 		try {
 			// 新しいノートを保存
@@ -95,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 			console.error("Failed to create new note:", err);
 			alert("新しいノートの作成に失敗しました");
 		}
-	};
+	}, [props]);
 
 	// 日付のフォーマット
 	const formatDate = (date: Date): string => {
@@ -176,7 +182,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 						</button>
 					</div>
 				) : (
-					notes.map((note) => (
+					memoizedNotes.map((note) => (
 						<div
 							key={note.ID}
 							className={`${styles.noteItem} ${

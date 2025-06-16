@@ -11,29 +11,34 @@ import styles from "./EditorHeaderPlugin.module.css";
 interface EditorHeaderPluginProps {
 	title: string;
 	dateLastModified: Date;
-	noteID?: string
+	noteID?: string;
 	onChange?(e: ChangeEvent<HTMLInputElement>): void;
+	// 入力制限を追加
+	maxTitleLength?: number;
 }
 
-export const EditorHeaderPlugin: React.FC<EditorHeaderPluginProps> = (
-	props
-) => {
+export const EditorHeaderPlugin: React.FC<EditorHeaderPluginProps> = ({
+	title,
+	dateLastModified,
+	noteID,
+	onChange,
+	maxTitleLength = 100,
+}) => {
 	return (
 		<div className={styles.noteHeader}>
 			<input
 				type="text"
-				value={props.title} // 状態を使用
-				onChange={(e) => props.onChange?.(e)}
+				value={title}
+				onChange={onChange}
 				className={styles.titleInput}
 				placeholder="ノートのタイトル"
+				maxLength={maxTitleLength}
 			/>
 			<div className={styles.noteInfo}>
 				<span className={styles.lastModified}>
-					最終更新: {props.dateLastModified.toLocaleString("ja-JP")}
+					最終更新: {dateLastModified.toLocaleString("ja-JP")}
 				</span>
-				<span className={styles.lastModified}>
-					ID: {props.noteID}
-				</span>
+				<span className={styles.lastModified}>ID: {noteID}</span>
 			</div>
 		</div>
 	);
