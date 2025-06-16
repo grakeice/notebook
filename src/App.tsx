@@ -1,14 +1,14 @@
 /**
  * Copyright (c) 2025 grakeice
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
 
 import { useState } from "react";
-import { Editor } from "./components/Editor/Editor";
-import { Sidebar } from "./components/Sidebar/Sidebar";
-import { Note } from "./core/models/Note";
+import { Editor } from "./components/Editor";
+import { Sidebar } from "./components/Sidebar";
+import { Note } from "./core/models";
 import styles from "./App.module.css";
 
 export const App: React.FC = () => {
