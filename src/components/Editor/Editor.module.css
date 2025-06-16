@@ -37,35 +37,6 @@
 	line-height: 1.6;
 }
 
-.noteHeader {
-	padding: 1rem 1.5rem;
-	border-bottom: 1px solid #e9ecef;
-	background-color: #f8f9fa;
-}
-
-.titleInput {
-	width: 100%;
-	border: none;
-	background: none;
-	font-size: 1.5rem;
-	font-weight: 600;
-	color: #333;
-	padding: 0.5rem 0;
-	margin-bottom: 0.5rem;
-	outline: none;
-}
-
-.noteInfo {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-}
-
-.lastModified {
-	font-size: 0.8rem;
-	color: #666;
-}
-
 .editorPlaceholder {
 	color: #999;
 	padding: 1rem;

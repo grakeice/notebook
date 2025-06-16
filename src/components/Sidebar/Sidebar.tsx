@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 grakeice
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
@@ -16,11 +16,7 @@ interface SidebarProps {
 	onNoteDeleted?: (deletedNoteId: string) => void; // 追加
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({
-	onNoteSelect,
-	selectedNoteId,
-	onNoteDeleted, // 追加
-}) => {
+export const Sidebar: React.FC<SidebarProps> = (props) => {
 	const [notes, setNotes] = useState<Note[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -52,10 +48,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		if (window.confirm("このノートを削除してもよろしいですか？")) {
 			try {
 				// 削除するノートが現在選択中のノートかどうかをチェック
-				const isSelectedNote = selectedNoteId === noteId;
+				const isSelectedNote = props.selectedNoteId === noteId;
 
 				// 削除前に親コンポーネントに通知
-				onNoteDeleted?.(noteId);
+				props.onNoteDeleted?.(noteId);
 
 				// 削除したノートが選択中だった場合、別のノートを選択
 				if (isSelectedNote) {
@@ -63,10 +59,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					const remainingNotes = notes.filter((note) => note.ID !== noteId);
 
 					if (remainingNotes.length > 0) {
-						onNoteSelect?.(remainingNotes[0]);
+						props.onNoteSelect?.(remainingNotes[0]);
 					} else {
 						// ノートが一つもない場合は選択を解除
-						onNoteSelect?.(null);
+						props.onNoteSelect?.(null);
 					}
 				}
 
@@ -94,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			// サイドバーの一覧を更新
 			await loadNotes();
 			// エディタで新しいノートを選択
-			onNoteSelect?.(newNote);
+			props.onNoteSelect?.(newNote);
 		} catch (err) {
 			console.error("Failed to create new note:", err);
 			alert("新しいノートの作成に失敗しました");
@@ -143,9 +139,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			<div className={styles.sidebar}>
 				<div className={styles.header}>
 					<h2>ノート</h2>
-					<button
-						className={styles.newNoteButton}
-						onClick={handleCreateNewNote}>
+					<button className={styles.newNoteButton} onClick={handleCreateNewNote}>
 						+
 					</button>
 				</div>
@@ -186,9 +180,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 						<div
 							key={note.ID}
 							className={`${styles.noteItem} ${
-								selectedNoteId === note.ID ? styles.selected : ""
+								props.selectedNoteId === note.ID ? styles.selected : ""
 							}`}
-							onClick={() => onNoteSelect?.(note)}>
+							onClick={() => props.onNoteSelect?.(note)}>
 							<div className={styles.noteHeader}>
 								<h3 className={styles.noteTitle}>{note.title}</h3>
 								<button
@@ -198,7 +192,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 									×
 								</button>
 							</div>
-							<p className={styles.notePreview}>{note.ID}</p>
+							<p className={styles.notePreview}>{note.summaryText}</p>
 							<div className={styles.noteDate}>
 								{formatDate(note.dateLastModified)}
 							</div>
