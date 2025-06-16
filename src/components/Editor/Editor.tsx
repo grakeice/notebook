@@ -41,7 +41,10 @@ interface EditorProps {
 	deletedNoteId?: string; // 削除されたノートのIDを追加
 }
 
-export const Editor: React.FC<EditorProps> = (props) => {
+export const Editor: React.FC<EditorProps> = ({
+	selectedNote,
+	deletedNoteId,
+}) => {
 	const [currentNote, setCurrentNote] = useState<Note | null>(null);
 	const [titleValue, setTitleValue] = useState<string>(""); // タイトル用の状態を追加
 	const [wordCount, setWordCount] = useState({ characters: 0, words: 0 });
@@ -50,24 +53,21 @@ export const Editor: React.FC<EditorProps> = (props) => {
 
 	// selectedNoteが変わったときの処理
 	useEffect(() => {
-		console.log(`Selected note has changed to: ${props.selectedNote?.ID}`);
-		if (props.selectedNote) {
-			setTitleValue(props.selectedNote.title); // タイトル状態を更新
+		console.log(`Selected note has changed to: ${selectedNote?.ID}`);
+		if (selectedNote) {
+			setTitleValue(selectedNote.title); // タイトル状態を更新
 		} else {
 			setTitleValue(""); // タイトル状態をリセット
 		}
-	}, [props.selectedNote]);
+	}, [selectedNote]);
 
 	useEffect(() => {
 		// 前のノートを保存
 		const savePreviousNote = async () => {
 			if (previousNoteRef.current && currentEditorStateRef.current) {
 				// 削除されたノートは保存しない
-				if (
-					props.deletedNoteId &&
-					previousNoteRef.current.ID === props.deletedNoteId
-				) {
-					console.log(`Skipping save for deleted note: ${props.deletedNoteId}`);
+				if (deletedNoteId && previousNoteRef.current.ID === deletedNoteId) {
+					console.log(`Skipping save for deleted note: ${deletedNoteId}`);
 					return;
 				}
 
@@ -87,18 +87,18 @@ export const Editor: React.FC<EditorProps> = (props) => {
 			}
 		};
 
-		if (props.selectedNote?.ID !== currentNote?.ID) {
+		if (selectedNote?.ID !== currentNote?.ID) {
 			savePreviousNote();
 		}
 
 		// 現在のノートを更新
 		previousNoteRef.current = currentNote;
-		if (props.selectedNote) {
-			setCurrentNote(props.selectedNote);
-		} else if (props.selectedNote === null) {
+		if (selectedNote) {
+			setCurrentNote(selectedNote);
+		} else if (selectedNote === null) {
 			setCurrentNote(null);
 		}
-	}, [props.selectedNote, currentNote, props.deletedNoteId]);
+	}, [selectedNote, currentNote, deletedNoteId]);
 
 	// エディターステートの妥当性をチェックする関数
 	const getValidEditorState = (
@@ -234,7 +234,7 @@ export const Editor: React.FC<EditorProps> = (props) => {
 		<div className={styles.editor}>
 			<LexicalComposer key={currentNote.ID} initialConfig={initialConfig}>
 				<EditorHeaderPlugin
-					noteID={props.selectedNote?.ID}
+					noteID={selectedNote?.ID}
 					title={titleValue}
 					dateLastModified={currentNote.dateLastModified}
 					onChange={(e) => {

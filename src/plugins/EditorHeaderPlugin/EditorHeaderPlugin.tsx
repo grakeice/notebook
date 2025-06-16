@@ -13,7 +13,6 @@ interface EditorHeaderPluginProps {
 	dateLastModified: Date;
 	noteID?: string;
 	onChange?(e: ChangeEvent<HTMLInputElement>): void;
-	// 入力制限を追加
 	maxTitleLength?: number;
 }
 

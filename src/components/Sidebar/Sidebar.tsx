@@ -16,7 +16,11 @@ interface SidebarProps {
 	onNoteDeleted?: (deletedNoteId: string) => void; // 追加
 }
 
-export const Sidebar: React.FC<SidebarProps> = (props) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+	selectedNoteId,
+	onNoteSelect,
+	onNoteDeleted,
+}) => {
 	const [notes, setNotes] = useState<Note[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -52,10 +56,10 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 			if (window.confirm("このノートを削除してもよろしいですか？")) {
 				try {
 					// 削除するノートが現在選択中のノートかどうかをチェック
-					const isSelectedNote = props.selectedNoteId === noteId;
+					const isSelectedNote = selectedNoteId === noteId;
 
 					// 削除前に親コンポーネントに通知
-					props.onNoteDeleted?.(noteId);
+					onNoteDeleted?.(noteId);
 
 					// 削除したノートが選択中だった場合、別のノートを選択
 					if (isSelectedNote) {
@@ -63,10 +67,10 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 						const remainingNotes = notes.filter((note) => note.ID !== noteId);
 
 						if (remainingNotes.length > 0) {
-							props.onNoteSelect?.(remainingNotes[0]);
+							onNoteSelect?.(remainingNotes[0]);
 						} else {
 							// ノートが一つもない場合は選択を解除
-							props.onNoteSelect?.(null);
+							onNoteSelect?.(null);
 						}
 					}
 
@@ -84,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 				}
 			}
 		},
-		[props, notes]
+		[selectedNoteId, onNoteDeleted, notes, onNoteSelect]
 	);
 
 	// 新しいノート作成
@@ -96,12 +100,12 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 			// サイドバーの一覧を更新
 			await loadNotes();
 			// エディタで新しいノートを選択
-			props.onNoteSelect?.(newNote);
+			onNoteSelect?.(newNote);
 		} catch (err) {
 			console.error("Failed to create new note:", err);
 			alert("新しいノートの作成に失敗しました");
 		}
-	}, [props]);
+	}, [onNoteSelect]);
 
 	// 日付のフォーマット
 	const formatDate = (date: Date): string => {
@@ -186,9 +190,9 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
 						<div
 							key={note.ID}
 							className={`${styles.noteItem} ${
-								props.selectedNoteId === note.ID ? styles.selected : ""
+								selectedNoteId === note.ID ? styles.selected : ""
 							}`}
-							onClick={() => props.onNoteSelect?.(note)}>
+							onClick={() => onNoteSelect?.(note)}>
 							<div className={styles.noteHeader}>
 								<h3 className={styles.noteTitle}>{note.title}</h3>
 								<button
