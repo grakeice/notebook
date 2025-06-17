@@ -27,14 +27,14 @@ interface SidebarProps {
 	onNoteSelect?: (note: Note | null) => void;
 	selectedNoteId?: string;
 	onNoteDeleted?: (deletedNoteId: string) => void;
-	className?: string; // 追加
+	className?: string;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
 	selectedNoteId,
 	onNoteSelect,
 	onNoteDeleted,
-	className = "", // 追加
+	className = "",
 }) => {
 	const [notes, setNotes] = useState<Note[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -95,16 +95,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			// 削除前に親コンポーネントに通知
 			onNoteDeleted?.(noteToDelete);
 
-			// 削除したノートが選択中だった場合、別のノートを選択
-			if (isSelectedNote) {
-				// 削除予定のノート以外のノートから最初のものを選択
-				const remainingNotes = notes.filter((note) => note.ID !== noteToDelete);
+			// モバイル判定
+			const isMobile = window.innerWidth <= 768;
 
-				if (remainingNotes.length > 0) {
-					onNoteSelect?.(remainingNotes[0]);
-				} else {
-					// ノートが一つもない場合は選択を解除
+			// 削除したノートが選択中だった場合の処理
+			if (isSelectedNote) {
+				if (isMobile) {
+					// スマホの場合は選択を解除するのみ
 					onNoteSelect?.(null);
+				} else {
+					// デスクトップの場合は別のノートを選択
+					const remainingNotes = notes.filter((note) => note.ID !== noteToDelete);
+
+					if (remainingNotes.length > 0) {
+						onNoteSelect?.(remainingNotes[0]);
+					} else {
+						// ノートが一つもない場合は選択を解除
+						onNoteSelect?.(null);
+					}
 				}
 			}
 
