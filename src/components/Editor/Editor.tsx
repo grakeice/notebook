@@ -30,6 +30,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDebounce } from "react-use";
 import { Note } from "../../core/models";
 import { noteService } from "../../core/services";
+import { EditorHeaderPlugin } from "../../plugins/EditorHeaderPlugin";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
 import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
 import { countWords } from "../../plugins/WordCounterPlugin/utils";
@@ -175,7 +176,7 @@ export const Editor: React.FC<EditorProps> = ({
 				console.error("Failed to save note:", error);
 			}
 		},
-		10000,
+		1000,
 		[currentEditorStateRef.current]
 	);
 
@@ -231,25 +232,15 @@ export const Editor: React.FC<EditorProps> = ({
 
 	return (
 		<div className={styles.editor}>
-			{/* ノートタイトル表示 */}
-			<div className={styles.noteHeader}>
-				<input
-					type="text"
-					value={titleValue} // 状態を使用
-					onChange={(e) => {
-						setTitleValue(e.target.value); // 状態を更新
-					}}
-					className={styles.titleInput}
-					placeholder="ノートのタイトル"
-				/>
-				<div className={styles.noteInfo}>
-					<span className={styles.lastModified}>
-						最終更新: {currentNote.dateLastModified.toLocaleString("ja-JP")}
-					</span>
-				</div>
-			</div>
-
 			<LexicalComposer key={currentNote.ID} initialConfig={initialConfig}>
+				<EditorHeaderPlugin
+					noteID={selectedNote?.ID}
+					title={titleValue}
+					dateLastModified={currentNote.dateLastModified}
+					onChange={(e) => {
+						setTitleValue(e.target.value);
+					}}
+				/>
 				<ToolbarPlugin />
 				<RichTextPlugin
 					contentEditable={<ContentEditable />}

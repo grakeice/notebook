@@ -5,10 +5,18 @@
  * https://opensource.org/licenses/MIT
  */
 
-body{
-	background-color: #e0e0e0;
+body {
+	background-color: var(--md-sys-color-background);
+	color: var(--md-sys-color-on-background);
+	font-family: var(--md-sys-typescale-body-medium-font);
+	font-size: var(--md-sys-typescale-body-medium-size);
+	font-weight: var(--md-sys-typescale-body-medium-weight);
+	line-height: var(--md-sys-typescale-body-medium-line-height);
+	margin: 0;
+	padding: 0;
 }
-.editor-container{
+
+.editor-container {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -16,4 +24,43 @@ body{
 	display: flex;
 	width: 100vw;
 	height: 100dvh;
+	background-color: var(--md-sys-color-surface);
+	box-shadow: var(--md-sys-elevation-level0);
+	overflow: hidden;
+}
+
+/* エディターコンテナ内の要素のスタイリング */
+.editor-container > * {
+	background-color: var(--md-sys-color-surface-container-low);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+	.editor-container {
+		width: 100vw;
+		height: 100dvh;
+		position: static;
+		transform: none;
+		top: auto;
+		left: auto;
+	}
+}
+
+/* スクロールバーのスタイリング（Webkit系ブラウザ） */
+.editor-container ::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.editor-container ::-webkit-scrollbar-track {
+	background: var(--md-sys-color-surface-container);
+}
+
+.editor-container ::-webkit-scrollbar-thumb {
+	background: var(--md-sys-color-outline-variant);
+	border-radius: var(--md-sys-shape-corner-full);
+}
+
+.editor-container ::-webkit-scrollbar-thumb:hover {
+	background: var(--md-sys-color-outline);
 }

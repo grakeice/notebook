@@ -5,4 +5,5 @@
  * https://opensource.org/licenses/MIT
  */
 
-export { Sidebar } from "./Sidebar";
+export * from "./MDC";
+export type * from "./MDC";

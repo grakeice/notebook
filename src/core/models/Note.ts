@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2025 grakeice
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
@@ -11,6 +11,7 @@ export interface INote {
 	content: object;
 	readonly dateCreated: Date;
 	dateLastModified: Date;
+	summaryText: string;
 }
 
 export class Note implements INote {
@@ -34,7 +35,7 @@ export class Note implements INote {
 		dateLastModified?: Date;
 	}) {
 		this.ID = ID ?? crypto.randomUUID();
-		this.title = title ?? "";
+		this.title = title ?? "Untitled";
 		this.content = content ?? {};
 		this.dateCreated = dateCreated ?? new Date();
 		this.dateLastModified = dateLastModified ?? new Date();
@@ -48,6 +49,33 @@ export class Note implements INote {
 	updateTitle(newTitle: string): void {
 		this.title = newTitle;
 		this.dateLastModified = new Date();
+	}
+
+	get summaryText() {
+		try {
+			const content = this.content as {
+				root: { children: Array<{ children: Array<{ text: string }> }> };
+			};
+
+			// より安全な型チェックを追加
+			if (!content?.root?.children?.[0]?.children) {
+				return "";
+			}
+
+			const textContent = content.root.children[0].children
+				.filter(
+					(child) =>
+						typeof child === "object" &&
+						"text" in child &&
+						typeof child.text === "string"
+				)
+				.map((v) => v.text)
+				.join("");
+
+			return textContent;
+		} catch {
+			return "";
+		}
 	}
 
 	toJSON(): Record<string, unknown> {
