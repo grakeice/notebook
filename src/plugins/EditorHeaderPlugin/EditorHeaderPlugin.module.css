@@ -5,31 +5,105 @@
  * https://opensource.org/licenses/MIT
  */
 
- .noteHeader {
-	padding: 1rem 1.5rem;
-	border-bottom: 1px solid #e9ecef;
-	background-color: #f8f9fa;
+.noteHeader {
+	padding: 1.5rem;
+	border-bottom: 1px solid var(--md-sys-color-outline-variant);
+	background-color: var(--md-sys-color-surface);
 }
 
 .titleInput {
 	width: 100%;
 	border: none;
 	background: none;
-	font-size: 1.5rem;
-	font-weight: 600;
-	color: #333;
+	font-family: var(--md-sys-typescale-headline-small-font);
+	font-size: var(--md-sys-typescale-headline-small-size);
+	font-weight: var(--md-sys-typescale-headline-small-weight);
+	line-height: var(--md-sys-typescale-headline-small-line-height);
+	color: var(--md-sys-color-on-surface);
 	padding: 0.5rem 0;
 	margin-bottom: 0.5rem;
 	outline: none;
+	transition: color var(--md-sys-motion-duration-short4)
+		var(--md-sys-motion-easing-standard);
+}
+
+.titleInput:focus {
+	outline: 2px solid var(--md-sys-color-primary);
+	outline-offset: 2px;
+	border-radius: var(--md-sys-shape-corner-extra-small);
+}
+
+.titleInput::placeholder {
+	color: var(--md-sys-color-on-surface-variant);
 }
 
 .noteInfo {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	margin-top: 0.5rem;
 }
 
 .lastModified {
-	font-size: 0.8rem;
-	color: #666;
+	font-family: var(--md-sys-typescale-body-small-font);
+	font-size: var(--md-sys-typescale-body-small-size);
+	font-weight: var(--md-sys-typescale-body-small-weight);
+	line-height: var(--md-sys-typescale-body-small-line-height);
+	color: var(--md-sys-color-on-surface-variant);
+}
+
+/* MDC Web Componentsのカスタマイズ */
+.noteHeader md-outlined-text-field {
+	width: 100%;
+	--md-outlined-text-field-container-shape: var(--md-sys-shape-corner-medium);
+	--md-outlined-text-field-label-text-color: var(
+		--md-sys-color-on-surface-variant
+	);
+	--md-outlined-text-field-input-text-color: var(--md-sys-color-on-surface);
+	--md-outlined-text-field-outline-color: var(--md-sys-color-outline);
+	--md-outlined-text-field-focus-outline-color: var(--md-sys-color-primary);
+	--md-outlined-text-field-input-text-font: var(
+		--md-sys-typescale-title-large-font
+	);
+	--md-outlined-text-field-input-text-size: var(
+		--md-sys-typescale-title-large-size
+	);
+	--md-outlined-text-field-input-text-weight: var(
+		--md-sys-typescale-title-large-weight
+	);
+	--md-outlined-text-field-input-text-line-height: var(
+		--md-sys-typescale-title-large-line-height
+	);
+	--md-outlined-text-field-label-text-font: var(
+		--md-sys-typescale-body-large-font
+	);
+	--md-outlined-text-field-label-text-size: var(
+		--md-sys-typescale-body-large-size
+	);
+}
+
+.noteHeader md-icon {
+	color: var(--md-sys-color-on-surface-variant);
+	font-size: 20px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+	.noteHeader {
+		padding: 1rem;
+	}
+
+	.noteInfo {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+}
+
+/* ダークテーマでの調整 */
+@media (prefers-color-scheme: dark) {
+	.titleInput:focus {
+		outline-color: var(--md-sys-color-primary);
+		background-color: var(--md-sys-color-surface-container-low);
+	}
 }

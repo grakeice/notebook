@@ -6,10 +6,71 @@
  */
 
 .toolbar {
-	color: #7a7a7a;
-	button {
-		background: none;
-		border: none;
-		cursor: pointer;
+	background-color: var(--md-sys-color-surface-container);
+	border-bottom: 1px solid var(--md-sys-color-outline-variant);
+	padding: 0.5rem 1rem;
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	min-height: 48px;
+}
+
+/* MDC Icon Button のカスタマイズ */
+.toolbar md-icon-button {
+	--md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
+	--md-icon-button-selected-icon-color: var(
+		--md-sys-color-on-secondary-container
+	);
+	--md-icon-button-selected-container-color: var(
+		--md-sys-color-secondary-container
+	);
+	--md-icon-button-state-layer-shape: var(--md-sys-shape-corner-small);
+	--md-icon-button-container-shape: var(--md-sys-shape-corner-small);
+	--md-icon-button-hover-state-layer-color: var(--md-sys-color-on-surface);
+	--md-icon-button-pressed-state-layer-color: var(--md-sys-color-on-surface);
+	--md-icon-button-focus-state-layer-color: var(--md-sys-color-primary);
+}
+
+/* セパレーター */
+.separator {
+	--md-divider-color: var(--md-sys-color-outline-variant);
+	--md-divider-thickness: 1px;
+	width: 1px;
+	height: 24px;
+	margin: 0 0.25rem;
+}
+
+/* MDC Icon のカスタマイズ */
+.toolbar md-icon {
+	font-size: 20px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+	.toolbar {
+		padding: 0.25rem 0.5rem;
+		gap: 0.125rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.toolbar::-webkit-scrollbar {
+		display: none;
+	}
+
+	.toolbar md-icon-button {
+		--md-icon-button-icon-size: 18px;
+	}
+
+	.toolbar md-icon {
+		font-size: 18px;
+	}
+}
+
+/* ダークテーマでの調整 */
+@media (prefers-color-scheme: dark) {
+	.toolbar {
+		border-bottom-color: var(--md-sys-color-outline-variant);
 	}
 }

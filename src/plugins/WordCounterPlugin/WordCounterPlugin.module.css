@@ -5,3 +5,59 @@
  * https://opensource.org/licenses/MIT
  */
 
+.wordCounter {
+	position: fixed;
+	bottom: 1rem;
+	right: 1rem;
+	background-color: var(--md-sys-color-surface-container-high);
+	color: var(--md-sys-color-on-surface-variant);
+	padding: 0.5rem 0.75rem;
+	border-radius: var(--md-sys-shape-corner-small);
+	font-family: var(--md-sys-typescale-label-small-font);
+	font-size: var(--md-sys-typescale-label-small-size);
+	font-weight: var(--md-sys-typescale-label-small-weight);
+	line-height: var(--md-sys-typescale-label-small-line-height);
+	border: 1px solid var(--md-sys-color-outline-variant);
+	box-shadow: var(--md-sys-elevation-level2);
+	z-index: 1000;
+	transition: all var(--md-sys-motion-duration-short4)
+		var(--md-sys-motion-easing-standard);
+}
+
+.wordCounter:hover {
+	background-color: var(--md-sys-color-surface-container-highest);
+	box-shadow: var(--md-sys-elevation-level3);
+}
+
+.wordCounter .count {
+	color: var(--md-sys-color-on-surface);
+	font-weight: var(--md-sys-typescale-label-medium-weight);
+}
+
+.wordCounter .label {
+	color: var(--md-sys-color-on-surface-variant);
+	margin-left: 0.25rem;
+}
+
+.wordCounter .separator {
+	margin: 0 0.5rem;
+	color: var(--md-sys-color-outline);
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+	.wordCounter {
+		bottom: 0.5rem;
+		right: 0.5rem;
+		padding: 0.375rem 0.5rem;
+		font-size: var(--md-sys-typescale-label-small-size);
+	}
+}
+
+/* ダークテーマでの追加調整 */
+@media (prefers-color-scheme: dark) {
+	.wordCounter {
+		background-color: var(--md-sys-color-surface-container);
+		border-color: var(--md-sys-color-outline-variant);
+	}
+}

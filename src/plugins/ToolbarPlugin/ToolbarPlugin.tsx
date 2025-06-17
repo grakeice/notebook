@@ -18,7 +18,7 @@ import {
 	$isRangeSelection,
 } from "lexical";
 import { useEffect, useState } from "react";
-import { TbArticle, TbH1, TbH2, TbH3 } from "react-icons/tb";
+import { MDIcon, MDIconButton, MDDivider } from "../../components/MDC";
 import styles from "./ToolbarPlugin.module.css";
 
 const SupportedBlockType = {
@@ -86,42 +86,43 @@ export const ToolbarPlugin: React.FC = () => {
 
 	return (
 		<div className={styles.toolbar}>
-			<button
+			<MDIconButton
 				type="button"
-				role="checkbox"
 				title={SupportedBlockType["paragraph"]}
 				aria-label={SupportedBlockType["paragraph"]}
-				aria-checked={blockType === "paragraph"}
+				selected={blockType === "paragraph"}
 				onClick={() => format("paragraph")}>
-				<TbArticle />
-			</button>
-			<button
+				<MDIcon>article</MDIcon>
+			</MDIconButton>
+
+			<MDDivider className={styles.separator} />
+
+			<MDIconButton
 				type="button"
-				role="checkbox"
 				title={SupportedBlockType["h1"]}
 				aria-label={SupportedBlockType["h1"]}
-				aria-checked={blockType === "h1"}
+				selected={blockType === "h1"}
 				onClick={() => format("h1")}>
-				<TbH1 />
-			</button>
-			<button
+				<MDIcon>looks_one</MDIcon>
+			</MDIconButton>
+
+			<MDIconButton
 				type="button"
-				role="checkbox"
 				title={SupportedBlockType["h2"]}
 				aria-label={SupportedBlockType["h2"]}
-				aria-checked={blockType === "h2"}
+				selected={blockType === "h2"}
 				onClick={() => format("h2")}>
-				<TbH2 />
-			</button>
-			<button
+				<MDIcon>looks_two</MDIcon>
+			</MDIconButton>
+
+			<MDIconButton
 				type="button"
-				role="checkbox"
 				title={SupportedBlockType["h3"]}
 				aria-label={SupportedBlockType["h3"]}
-				aria-checked={blockType === "h3"}
+				selected={blockType === "h3"}
 				onClick={() => format("h3")}>
-				<TbH3 />
-			</button>
+				<MDIcon>looks_3</MDIcon>
+			</MDIconButton>
 		</div>
 	);
 };
