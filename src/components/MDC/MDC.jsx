@@ -68,8 +68,24 @@ const MDSuggestionChip = ({ children, ...props }) => {
 };
 
 // Dialog Components
-const MDDialog = ({ children, ...props }) => {
-	return <md-dialog {...props}>{children}</md-dialog>;
+const MDDialog = ({ children, onCancel, onClose, ...props }) => {
+	const handleCancel = (event) => {
+		if (onCancel) {
+			onCancel(event);
+		}
+	};
+
+	const handleClose = (event) => {
+		if (onClose) {
+			onClose(event);
+		}
+	};
+
+	return (
+		<md-dialog {...props} oncancel={handleCancel} onclose={handleClose}>
+			{children}
+		</md-dialog>
+	);
 };
 
 // Divider Components

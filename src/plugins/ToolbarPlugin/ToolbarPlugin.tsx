@@ -20,6 +20,7 @@ import {
 import { useEffect, useState } from "react";
 import { MDIcon, MDIconButton, MDDivider } from "../../components/MDC";
 import styles from "./ToolbarPlugin.module.css";
+import { HiMiniH1, HiMiniH2, HiMiniH3 } from "react-icons/hi2";
 
 const SupportedBlockType = {
 	paragraph: "Paragraph",
@@ -103,7 +104,9 @@ export const ToolbarPlugin: React.FC = () => {
 				aria-label={SupportedBlockType["h1"]}
 				selected={blockType === "h1"}
 				onClick={() => format("h1")}>
-				<MDIcon>looks_one</MDIcon>
+				<MDIcon>
+					<HiMiniH1 />
+				</MDIcon>
 			</MDIconButton>
 
 			<MDIconButton
@@ -112,7 +115,9 @@ export const ToolbarPlugin: React.FC = () => {
 				aria-label={SupportedBlockType["h2"]}
 				selected={blockType === "h2"}
 				onClick={() => format("h2")}>
-				<MDIcon>looks_two</MDIcon>
+				<MDIcon>
+					<HiMiniH2 />
+				</MDIcon>
 			</MDIconButton>
 
 			<MDIconButton
@@ -121,7 +126,9 @@ export const ToolbarPlugin: React.FC = () => {
 				aria-label={SupportedBlockType["h3"]}
 				selected={blockType === "h3"}
 				onClick={() => format("h3")}>
-				<MDIcon>looks_3</MDIcon>
+				<MDIcon>
+					<HiMiniH3 />
+				</MDIcon>
 			</MDIconButton>
 		</div>
 	);
