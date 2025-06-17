@@ -43,6 +43,47 @@
 	font-style: italic;
 }
 
+/* モバイル用ヘッダー */
+.mobileHeader {
+	display: none;
+	align-items: center;
+	padding: 0.5rem;
+	background-color: var(--md-sys-color-surface-container);
+	border-bottom: 1px solid var(--md-sys-color-outline-variant);
+	gap: 0.5rem;
+}
+
+.mobileHeader span {
+	font-family: var(--md-sys-typescale-title-medium-font);
+	font-size: var(--md-sys-typescale-title-medium-size);
+	font-weight: var(--md-sys-typescale-title-medium-weight);
+	color: var(--md-sys-color-on-surface);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* モバイル用の非表示クラス */
+.mobileHidden {
+	display: none !important;
+}
+
+/* モバイル表示時のスタイル */
+@media (max-width: 768px) {
+	.editor {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100dvh;
+		z-index: 999;
+	}
+
+	.mobileHeader {
+		display: flex;
+	}
+}
+
 /* エディター本体のスタイル */
 .editor :global([data-lexical-editor]) {
 	flex: 1;

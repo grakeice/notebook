@@ -34,7 +34,7 @@ body {
 	background-color: var(--md-sys-color-surface-container-low);
 }
 
-/* レスポンシブ対応 */
+/* モバイル用のスタイル */
 @media (max-width: 768px) {
 	.editor-container {
 		width: 100vw;
@@ -43,6 +43,20 @@ body {
 		transform: none;
 		top: auto;
 		left: auto;
+	}
+
+	.mobileVisible {
+		display: flex !important;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100dvh;
+		z-index: 1000;
+	}
+
+	.mobileHidden {
+		display: none !important;
 	}
 }
 

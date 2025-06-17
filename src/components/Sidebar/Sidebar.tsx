@@ -27,12 +27,14 @@ interface SidebarProps {
 	onNoteSelect?: (note: Note | null) => void;
 	selectedNoteId?: string;
 	onNoteDeleted?: (deletedNoteId: string) => void;
+	className?: string; // 追加
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
 	selectedNoteId,
 	onNoteSelect,
 	onNoteDeleted,
+	className = "", // 追加
 }) => {
 	const [notes, setNotes] = useState<Note[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -199,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	// 初回読み込み中のUI
 	if (loading && !refreshing) {
 		return (
-			<div className={styles.sidebar}>
+			<div className={`${styles.sidebar} ${className}`}>
 				<div className={styles.header}>
 					<h2>ノート</h2>
 					<MDIconButton onClick={handleCreateNewNoteClick} title="新しいノート">
@@ -224,7 +226,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	// エラー時のUI
 	if (error) {
 		return (
-			<div className={styles.sidebar}>
+			<div className={`${styles.sidebar} ${className}`}>
 				<div className={styles.header}>
 					<h2>ノート</h2>
 					<MDIconButton onClick={handleCreateNewNoteClick}>
@@ -247,7 +249,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	}
 
 	return (
-		<div className={styles.sidebar}>
+		<div className={`${styles.sidebar} ${className}`}>
 			<div className={styles.header}>
 				<h2>ノート</h2>
 				<MDIconButton onClick={handleCreateNewNoteClick} title="新しいノート">

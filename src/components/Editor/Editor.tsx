@@ -34,19 +34,26 @@ import { EditorHeaderPlugin } from "../../plugins/EditorHeaderPlugin";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
 import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
 import { countWords } from "../../plugins/WordCounterPlugin/utils";
+import { MDIcon, MDIconButton } from "../MDC";
 import styles from "./Editor.module.css";
 
 interface EditorProps {
 	selectedNote?: Note | null;
-	deletedNoteId?: string; // 削除されたノートのIDを追加
+	deletedNoteId?: string;
+	onBackToSidebar?: () => void; // 追加
+	isMobile?: boolean; // 追加
+	showInMobile?: boolean; // 追加
 }
 
 export const Editor: React.FC<EditorProps> = ({
 	selectedNote,
 	deletedNoteId,
+	onBackToSidebar,
+	isMobile = false,
+	showInMobile = true,
 }) => {
 	const [currentNote, setCurrentNote] = useState<Note | null>(null);
-	const [titleValue, setTitleValue] = useState<string>(""); // タイトル用の状態を追加
+	const [titleValue, setTitleValue] = useState<string>("");
 	const [wordCount, setWordCount] = useState({ characters: 0, words: 0 });
 	const currentEditorStateRef = useRef<EditorState | null>(null);
 	const previousNoteRef = useRef<Note | null>(null);
@@ -55,9 +62,9 @@ export const Editor: React.FC<EditorProps> = ({
 	useEffect(() => {
 		console.log(`Selected note has changed to: ${selectedNote?.ID}`);
 		if (selectedNote) {
-			setTitleValue(selectedNote.title); // タイトル状態を更新
+			setTitleValue(selectedNote.title);
 		} else {
-			setTitleValue(""); // タイトル状態をリセット
+			setTitleValue("");
 		}
 	}, [selectedNote]);
 
@@ -219,7 +226,18 @@ export const Editor: React.FC<EditorProps> = ({
 	// currentNoteがない場合の表示
 	if (!currentNote) {
 		return (
-			<div className={styles.editor}>
+			<div
+				className={`${styles.editor} ${
+					isMobile && !showInMobile ? styles.mobileHidden : ""
+				}`}>
+				{isMobile && (
+					<div className={styles.mobileHeader}>
+						<MDIconButton onClick={onBackToSidebar} title="ノート一覧に戻る">
+							<MDIcon>arrow_back</MDIcon>
+						</MDIconButton>
+						<span>ノート</span>
+					</div>
+				)}
 				<div className={styles.placeholder}>
 					<h2>ノートを選択してください</h2>
 					<p>
@@ -231,7 +249,18 @@ export const Editor: React.FC<EditorProps> = ({
 	}
 
 	return (
-		<div className={styles.editor}>
+		<div
+			className={`${styles.editor} ${
+				isMobile && !showInMobile ? styles.mobileHidden : ""
+			}`}>
+			{isMobile && (
+				<div className={styles.mobileHeader}>
+					<MDIconButton onClick={onBackToSidebar} title="ノート一覧に戻る">
+						<MDIcon>arrow_back</MDIcon>
+					</MDIconButton>
+					<span>{currentNote.title || "無題のノート"}</span>
+				</div>
+			)}
 			<LexicalComposer key={currentNote.ID} initialConfig={initialConfig}>
 				<EditorHeaderPlugin
 					noteID={selectedNote?.ID}
