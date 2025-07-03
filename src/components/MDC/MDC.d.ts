@@ -5,7 +5,7 @@
  * https://opensource.org/licenses/MIT
  */
 
-import React from "react";
+import type React from "react";
 
 // 基本的なプロパティ型定義
 export interface MDBaseProps extends React.HTMLAttributes<HTMLElement> {

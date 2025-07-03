@@ -6,4 +6,3 @@
  */
 
 export * from "./MDC";
-export type * from "./MDC";

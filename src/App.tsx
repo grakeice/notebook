@@ -5,11 +5,11 @@
  * https://opensource.org/licenses/MIT
  */
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import styles from "./App.module.css";
 import { Editor } from "./components/Editor";
 import { Sidebar } from "./components/Sidebar";
-import { Note } from "./core/models";
-import styles from "./App.module.css";
+import type { Note } from "./core/models";
 
 export const App: React.FC = () => {
 	const [selectedNote, setSelectedNote] = useState<Note | null>(null);
@@ -61,7 +61,11 @@ export const App: React.FC = () => {
 				selectedNoteId={selectedNote?.ID}
 				onNoteDeleted={handleNoteDeleted}
 				className={
-					isMobile ? (showSidebar ? styles.mobileVisible : styles.mobileHidden) : ""
+					isMobile
+						? showSidebar
+							? styles.mobileVisible
+							: styles.mobileHidden
+						: ""
 				}
 			/>
 			<Editor
