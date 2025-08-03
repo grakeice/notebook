@@ -48,9 +48,15 @@ export class StorageService {
 
 				// ストアが存在しない場合のみ作成
 				if (!db.objectStoreNames.contains(this.storeName)) {
-					const store = db.createObjectStore(this.storeName, { keyPath: "id" });
-					store.createIndex("createdAt", "createdAt", { unique: false });
-					store.createIndex("updatedAt", "updatedAt", { unique: false });
+					const store = db.createObjectStore(this.storeName, {
+						keyPath: "id",
+					});
+					store.createIndex("createdAt", "createdAt", {
+						unique: false,
+					});
+					store.createIndex("updatedAt", "updatedAt", {
+						unique: false,
+					});
 				}
 			};
 		});
@@ -67,25 +73,39 @@ export class StorageService {
 					const db = await this.initDB();
 
 					// 既存アイテムの取得用トランザクション
-					const readTransaction = db.transaction([this.storeName], "readonly");
-					const readStore = readTransaction.objectStore(this.storeName);
+					const readTransaction = db.transaction(
+						[this.storeName],
+						"readonly",
+					);
+					const readStore = readTransaction.objectStore(
+						this.storeName,
+					);
 
-					const existingItem = await new Promise<StorageItem | null>((resolve) => {
-						const request = readStore.get(key);
+					const existingItem = await new Promise<StorageItem | null>(
+						(resolve) => {
+							const request = readStore.get(key);
 
-						request.onsuccess = () => {
-							const result = request.result as StorageItem | undefined;
-							resolve(result || null);
-						};
+							request.onsuccess = () => {
+								const result = request.result as
+									| StorageItem
+									| undefined;
+								resolve(result || null);
+							};
 
-						request.onerror = () => {
-							resolve(null); // エラーの場合は新規作成として扱う
-						};
-					});
+							request.onerror = () => {
+								resolve(null); // エラーの場合は新規作成として扱う
+							};
+						},
+					);
 
 					// 書き込み用の新しいトランザクション
-					const writeTransaction = db.transaction([this.storeName], "readwrite");
-					const writeStore = writeTransaction.objectStore(this.storeName);
+					const writeTransaction = db.transaction(
+						[this.storeName],
+						"readwrite",
+					);
+					const writeStore = writeTransaction.objectStore(
+						this.storeName,
+					);
 
 					const now = new Date();
 					const item: StorageItem = {
@@ -100,12 +120,18 @@ export class StorageService {
 
 						request.onsuccess = () => resolve();
 						request.onerror = () =>
-							reject(new Error(`Failed to save item: ${request.error?.message}`));
+							reject(
+								new Error(
+									`Failed to save item: ${request.error?.message}`,
+								),
+							);
 
 						// トランザクションのエラーハンドリングも追加
 						writeTransaction.onerror = () =>
 							reject(
-								new Error(`Transaction failed: ${writeTransaction.error?.message}`)
+								new Error(
+									`Transaction failed: ${writeTransaction.error?.message}`,
+								),
 							);
 					});
 				} catch (error) {
@@ -113,12 +139,16 @@ export class StorageService {
 					if (retryCount >= maxRetries) {
 						throw error;
 					}
-					await new Promise((resolve) => setTimeout(resolve, 100 * retryCount));
+					await new Promise((resolve) =>
+						setTimeout(resolve, 100 * retryCount),
+					);
 				}
 			}
 		} catch (error) {
 			console.error("StorageService save error:", error);
-			throw new Error(`Failed to save after ${maxRetries} attempts: ${error}`);
+			throw new Error(
+				`Failed to save after ${maxRetries} attempts: ${error}`,
+			);
 		}
 	}
 
@@ -137,7 +167,11 @@ export class StorageService {
 				};
 
 				request.onerror = () =>
-					reject(new Error(`Failed to load item: ${request.error?.message}`));
+					reject(
+						new Error(
+							`Failed to load item: ${request.error?.message}`,
+						),
+					);
 			});
 		} catch (error) {
 			console.error("StorageService load error:", error);
@@ -156,7 +190,11 @@ export class StorageService {
 
 				request.onsuccess = () => resolve();
 				request.onerror = () =>
-					reject(new Error(`Failed to delete item: ${request.error?.message}`));
+					reject(
+						new Error(
+							`Failed to delete item: ${request.error?.message}`,
+						),
+					);
 			});
 		} catch (error) {
 			console.error("StorageService delete error:", error);
@@ -178,7 +216,11 @@ export class StorageService {
 				};
 
 				request.onerror = () =>
-					reject(new Error(`Failed to get keys: ${request.error?.message}`));
+					reject(
+						new Error(
+							`Failed to get keys: ${request.error?.message}`,
+						),
+					);
 			});
 		} catch (error) {
 			console.error("StorageService getAllKeys error:", error);
@@ -201,7 +243,9 @@ export class StorageService {
 
 				request.onerror = () =>
 					reject(
-						new Error(`Failed to get all items: ${request.error?.message}`)
+						new Error(
+							`Failed to get all items: ${request.error?.message}`,
+						),
 					);
 			});
 		} catch (error) {
@@ -212,7 +256,7 @@ export class StorageService {
 
 	async getItemsByDateRange(
 		startDate: Date,
-		endDate: Date
+		endDate: Date,
 	): Promise<StorageItem[]> {
 		try {
 			const db = await this.initDB();
@@ -231,8 +275,8 @@ export class StorageService {
 				request.onerror = () =>
 					reject(
 						new Error(
-							`Failed to get items by date range: ${request.error?.message}`
-						)
+							`Failed to get items by date range: ${request.error?.message}`,
+						),
 					);
 			});
 		} catch (error) {
@@ -252,7 +296,11 @@ export class StorageService {
 
 				request.onsuccess = () => resolve();
 				request.onerror = () =>
-					reject(new Error(`Failed to clear store: ${request.error?.message}`));
+					reject(
+						new Error(
+							`Failed to clear store: ${request.error?.message}`,
+						),
+					);
 			});
 		} catch (error) {
 			console.error("StorageService clear error:", error);
@@ -260,7 +308,10 @@ export class StorageService {
 		}
 	}
 
-	async getStorageInfo(): Promise<{ itemCount: number; storageSize: number }> {
+	async getStorageInfo(): Promise<{
+		itemCount: number;
+		storageSize: number;
+	}> {
 		try {
 			const items = await this.getAllItems();
 			const itemCount = items.length;

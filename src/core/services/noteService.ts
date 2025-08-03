@@ -103,7 +103,7 @@ export class NoteService {
 	 * 複数のノートの差分をバッチで確認する
 	 */
 	async checkMultipleNotesChanges(
-		notes: Note[]
+		notes: Note[],
 	): Promise<Map<string, boolean>> {
 		const results = new Map<string, boolean>();
 
@@ -112,7 +112,7 @@ export class NoteService {
 				notes.map(async (note) => {
 					const hasChanged = await this.hasNoteChanged(note);
 					results.set(note.ID, hasChanged);
-				})
+				}),
 			);
 		} catch (error) {
 			console.error("Failed to check multiple notes changes:", error);
@@ -125,13 +125,17 @@ export class NoteService {
 	 * ノートの変更があった場合のみ保存する
 	 */
 	async saveNoteIfChanged(
-		note: Note
+		note: Note,
 	): Promise<{ saved: boolean; reason: string; id: string }> {
 		try {
 			const hasChanged = await this.hasNoteChangedByHash(note);
 
 			if (!hasChanged) {
-				return { id: note.ID, saved: false, reason: "No change detected" };
+				return {
+					id: note.ID,
+					saved: false,
+					reason: "No change detected",
+				};
 			}
 
 			await this.saveNote(note);
@@ -173,11 +177,15 @@ export class NoteService {
 	async getAllNotes(): Promise<Note[]> {
 		try {
 			const keys = await storageService.getAllKeys();
-			const noteKeys = keys.filter((key) => key.startsWith(this.NOTE_PREFIX));
+			const noteKeys = keys.filter((key) =>
+				key.startsWith(this.NOTE_PREFIX),
+			);
 
 			const notes: Note[] = [];
 			for (const key of noteKeys) {
-				const note = await this.loadNote(key.replace(this.NOTE_PREFIX, ""));
+				const note = await this.loadNote(
+					key.replace(this.NOTE_PREFIX, ""),
+				);
 				if (note) {
 					notes.push(note);
 				}
@@ -185,7 +193,8 @@ export class NoteService {
 
 			// 更新日時順でソート
 			return notes.sort(
-				(a, b) => b.dateLastModified.getTime() - a.dateLastModified.getTime()
+				(a, b) =>
+					b.dateLastModified.getTime() - a.dateLastModified.getTime(),
 			);
 		} catch (error) {
 			console.error("Failed to get all notes:", error);
@@ -201,7 +210,9 @@ export class NoteService {
 			return allNotes.filter(
 				(note) =>
 					note.title.toLowerCase().includes(lowercaseQuery) ||
-					JSON.stringify(note.content).toLowerCase().includes(lowercaseQuery)
+					JSON.stringify(note.content)
+						.toLowerCase()
+						.includes(lowercaseQuery),
 			);
 		} catch (error) {
 			console.error("Failed to search notes:", error);
@@ -214,7 +225,7 @@ export class NoteService {
 			const info = await storageService.getStorageInfo();
 			const keys = await storageService.getAllKeys();
 			const noteCount = keys.filter((key) =>
-				key.startsWith(this.NOTE_PREFIX)
+				key.startsWith(this.NOTE_PREFIX),
 			).length;
 
 			return {

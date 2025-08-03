@@ -73,12 +73,16 @@ export const ToolbarPlugin: React.FC = () => {
 				switch (headingSize) {
 					case "paragraph":
 						if ($isRangeSelection(selection)) {
-							$setBlocksType(selection, () => $createParagraphNode());
+							$setBlocksType(selection, () =>
+								$createParagraphNode(),
+							);
 						}
 						break;
 					default:
 						if ($isRangeSelection(selection)) {
-							$setBlocksType(selection, () => $createHeadingNode(headingSize));
+							$setBlocksType(selection, () =>
+								$createHeadingNode(headingSize),
+							);
 						}
 				}
 			});
@@ -92,7 +96,8 @@ export const ToolbarPlugin: React.FC = () => {
 				title={SupportedBlockType["paragraph"]}
 				aria-label={SupportedBlockType["paragraph"]}
 				selected={blockType === "paragraph"}
-				onClick={() => format("paragraph")}>
+				onClick={() => format("paragraph")}
+			>
 				<MDIcon>article</MDIcon>
 			</MDIconButton>
 
@@ -103,7 +108,8 @@ export const ToolbarPlugin: React.FC = () => {
 				title={SupportedBlockType["h1"]}
 				aria-label={SupportedBlockType["h1"]}
 				selected={blockType === "h1"}
-				onClick={() => format("h1")}>
+				onClick={() => format("h1")}
+			>
 				<MDIcon>
 					<HiMiniH1 />
 				</MDIcon>
@@ -114,7 +120,8 @@ export const ToolbarPlugin: React.FC = () => {
 				title={SupportedBlockType["h2"]}
 				aria-label={SupportedBlockType["h2"]}
 				selected={blockType === "h2"}
-				onClick={() => format("h2")}>
+				onClick={() => format("h2")}
+			>
 				<MDIcon>
 					<HiMiniH2 />
 				</MDIcon>
@@ -125,7 +132,8 @@ export const ToolbarPlugin: React.FC = () => {
 				title={SupportedBlockType["h3"]}
 				aria-label={SupportedBlockType["h3"]}
 				selected={blockType === "h3"}
-				onClick={() => format("h3")}>
+				onClick={() => format("h3")}
+			>
 				<MDIcon>
 					<HiMiniH3 />
 				</MDIcon>

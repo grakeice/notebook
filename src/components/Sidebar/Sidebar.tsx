@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Note } from "../../core/models/Note";
 import { noteService } from "../../core/services/noteService";
 import {
@@ -21,6 +22,7 @@ import {
 	MDOutlinedTextField,
 	MDTextButton,
 } from "../MDC";
+import "../../i18n";
 import styles from "./Sidebar.module.css";
 
 interface SidebarProps {
@@ -36,6 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	onNoteDeleted,
 	className = "",
 }) => {
+	const { t } = useTranslation();
 	const [notes, setNotes] = useState<Note[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
@@ -44,10 +47,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const [newNoteTitle, setNewNoteTitle] = useState("");
-	const sleep = (ms: number) =>
-		new Promise((resolve) => setTimeout(resolve, ms));
+	// useMemoでsleepを定義
+	const sleep = useMemo(
+		() => (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
+		[],
+	);
+
 	// ノート一覧を取得
-	const loadNotes = async (isRefresh = false) => {
+	const loadNotes = useCallback(async (isRefresh = false) => {
 		try {
 			if (isRefresh) {
 				setRefreshing(true);
@@ -64,12 +71,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			setLoading(false);
 			setRefreshing(false);
 		}
-	};
+	}, []);
 
 	// 初回読み込み
 	useEffect(() => {
 		loadNotes();
-	}, []);
+	}, [loadNotes]);
 
 	// メモ化によるパフォーマンス改善
 	const memoizedNotes = useMemo(() => notes, [notes]);
@@ -81,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			setNoteToDelete(noteId);
 			setDeleteDialogOpen(true);
 		},
-		[]
+		[],
 	);
 
 	// ノート削除の確認
@@ -105,7 +112,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					onNoteSelect?.(null);
 				} else {
 					// デスクトップの場合は別のノートを選択
-					const remainingNotes = notes.filter((note) => note.ID !== noteToDelete);
+					const remainingNotes = notes.filter(
+						(note) => note.ID !== noteToDelete,
+					);
 
 					if (remainingNotes.length > 0) {
 						onNoteSelect?.(remainingNotes[0]);
@@ -122,7 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
 			// 成功した場合のみローカルの配列からも削除
 			setNotes((prevNotes) =>
-				prevNotes.filter((note) => note.ID !== noteToDelete)
+				prevNotes.filter((note) => note.ID !== noteToDelete),
 			);
 		} catch (err) {
 			console.error("Failed to delete note:", err);
@@ -133,14 +142,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			setDeleteDialogOpen(false);
 			setNoteToDelete(null);
 		}
-	}, [noteToDelete, selectedNoteId, onNoteDeleted, notes, onNoteSelect]);
+	}, [
+		noteToDelete,
+		selectedNoteId,
+		onNoteDeleted,
+		notes,
+		onNoteSelect,
+		loadNotes,
+	]);
 
 	// 削除キャンセル
 	const handleCancelDelete = useCallback(async () => {
 		await sleep(250);
 		setDeleteDialogOpen(false);
 		setNoteToDelete(null);
-	}, []);
+	}, [sleep]);
 
 	// 新しいノート作成ダイアログを開く
 	const handleCreateNewNoteClick = useCallback(() => {
@@ -167,19 +183,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			setCreateDialogOpen(false);
 			setNewNoteTitle("");
 		}
-	}, [newNoteTitle, onNoteSelect]);
+	}, [newNoteTitle, onNoteSelect, loadNotes]);
 
 	// 新しいノート作成のキャンセル
 	const handleCancelCreateNote = useCallback(async () => {
 		await sleep(250);
 		setCreateDialogOpen(false);
 		setNewNoteTitle("");
-	}, []);
+	}, [sleep]);
 
 	// リフレッシュボタンのハンドラー
 	const handleRefresh = useCallback(() => {
 		loadNotes(true);
-	}, []);
+	}, [loadNotes]);
 
 	// 日付のフォーマット
 	const formatDate = (date: Date): string => {
@@ -211,8 +227,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		return (
 			<div className={`${styles.sidebar} ${className}`}>
 				<div className={styles.header}>
-					<h2>ノート</h2>
-					<MDIconButton onClick={handleCreateNewNoteClick} title="新しいノート">
+					<h2>{t("Sidebar.notes", "ノート")}</h2>
+					<MDIconButton
+						onClick={handleCreateNewNoteClick}
+						title={t("Sidebar.newNote", "新しいノート")}
+					>
 						<MDIcon>add</MDIcon>
 					</MDIconButton>
 				</div>
@@ -223,9 +242,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 				<div className={styles.footer}>
 					<MDTextButton onClick={handleRefresh}>
 						<MDIcon slot="icon">refresh</MDIcon>
-						更新
+						{t("Sidebar.refresh", "更新")}
 					</MDTextButton>
-					<span className={styles.noteCount}>-- 個のノート</span>
+					<span className={styles.noteCount}>
+						-- {t("Sidebar.noteCount", "個のノート")}
+					</span>
 				</div>
 			</div>
 		);
@@ -236,21 +257,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
 		return (
 			<div className={`${styles.sidebar} ${className}`}>
 				<div className={styles.header}>
-					<h2>ノート</h2>
+					<h2>{t("Sidebar.notes", "ノート")}</h2>
 					<MDIconButton onClick={handleCreateNewNoteClick}>
 						<MDIcon>add</MDIcon>
 					</MDIconButton>
 				</div>
 				<div className={styles.error}>
 					<span>{error}</span>
-					<MDTextButton onClick={() => loadNotes()}>再試行</MDTextButton>
+					<MDTextButton onClick={() => loadNotes()}>
+						{t("Sidebar.retry", "再試行")}
+					</MDTextButton>
 				</div>
 				<div className={styles.footer}>
 					<MDTextButton onClick={handleRefresh}>
 						<MDIcon slot="icon">refresh</MDIcon>
-						更新
+						{t("Sidebar.refresh", "更新")}
 					</MDTextButton>
-					<span className={styles.noteCount}>-- 個のノート</span>
+					<span className={styles.noteCount}>
+						-- {t("Sidebar.noteCount", "個のノート")}
+					</span>
 				</div>
 			</div>
 		);
@@ -259,8 +284,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
 	return (
 		<div className={`${styles.sidebar} ${className}`}>
 			<div className={styles.header}>
-				<h2>ノート</h2>
-				<MDIconButton onClick={handleCreateNewNoteClick} title="新しいノート">
+				<h2>{t("Sidebar.notes", "ノート")}</h2>
+				<MDIconButton
+					onClick={handleCreateNewNoteClick}
+					title={t("Sidebar.newNote", "新しいノート")}
+				>
 					<MDIcon>add</MDIcon>
 				</MDIconButton>
 			</div>
@@ -268,9 +296,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			{notes.length === 0 ? (
 				<div className={styles.emptyState}>
 					<MDIcon>description</MDIcon>
-					<p>まだノートがありません</p>
+					<p>{t("Sidebar.noNotes", "まだノートがありません")}</p>
 					<MDFilledButton onClick={handleCreateNewNoteClick}>
-						最初のノートを作成
+						{t("Sidebar.createFirstNote", "最初のノートを作成")}
 					</MDFilledButton>
 				</div>
 			) : (
@@ -278,7 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 					{refreshing && (
 						<div className={styles.refreshIndicator}>
 							<MDCircularProgress indeterminate />
-							<span>更新中...</span>
+							<span>{t("Sidebar.refreshing", "更新中...")}</span>
 						</div>
 					)}
 					<MDList className={styles.notesList}>
@@ -286,21 +314,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
 							<div key={note.ID}>
 								<MDListItem
 									type="button"
-									className={selectedNoteId === note.ID ? styles.selected : ""}
-									onClick={() => onNoteSelect?.(note)}>
+									className={
+										selectedNoteId === note.ID
+											? styles.selected
+											: ""
+									}
+									onClick={() => onNoteSelect?.(note)}
+								>
 									<div slot="headline">{note.title}</div>
-									<div slot="supporting-text">{note.summaryText}</div>
+									<div slot="supporting-text">
+										{note.summaryText}
+									</div>
 									<div slot="trailing-supporting-text">
 										{formatDate(note.dateLastModified)}
 									</div>
 									<MDIconButton
 										slot="end"
-										onClick={(e: React.MouseEvent) => handleDeleteNoteClick(note.ID, e)}
-										title="削除">
+										onClick={(e: React.MouseEvent) =>
+											handleDeleteNoteClick(note.ID, e)
+										}
+										title={t("Sidebar.delete", "削除")}
+									>
 										<MDIcon>clear</MDIcon>
 									</MDIconButton>
 								</MDListItem>
-								{index < memoizedNotes.length - 1 && <MDDivider />}
+								{index < memoizedNotes.length - 1 && (
+									<MDDivider />
+								)}
 							</div>
 						))}
 					</MDList>
@@ -310,9 +350,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 			<div className={styles.footer}>
 				<MDTextButton onClick={handleRefresh} disabled={refreshing}>
 					<MDIcon slot="icon">refresh</MDIcon>
-					{refreshing ? "更新中..." : "更新"}
+					{refreshing
+						? t("Sidebar.refreshing", "更新中...")
+						: t("Sidebar.refresh", "更新")}
 				</MDTextButton>
-				<span className={styles.noteCount}>{notes.length} 個のノート</span>
+				<span className={styles.noteCount}>
+					{notes.length} {t("Sidebar.noteCount", "個のノート")}
+				</span>
 			</div>
 
 			{/* 新しいノート作成ダイアログ */}
@@ -320,19 +364,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
 				className="new_note"
 				open={createDialogOpen}
 				onClose={handleCancelCreateNote}
-				onCancel={handleCancelCreateNote}>
-				<div slot="headline">新しいノートを作成</div>
+				onCancel={handleCancelCreateNote}
+			>
+				<div slot="headline">
+					{t("Sidebar.createNote", "新しいノートを作成")}
+				</div>
 				<div slot="content">
 					<MDOutlinedTextField
-						label="ノートのタイトル"
+						label={t("Sidebar.noteTitle", "ノートのタイトル")}
 						value={newNoteTitle}
-						onInput={(e) => setNewNoteTitle((e.target as HTMLInputElement).value)}
-						placeholder="タイトルを入力してください"
+						onInput={(e) =>
+							setNewNoteTitle(
+								(e.target as HTMLInputElement).value,
+							)
+						}
+						placeholder={t(
+							"Sidebar.enterTitle",
+							"タイトルを入力してください",
+						)}
 					/>
 				</div>
 				<div slot="actions">
-					<MDTextButton onClick={handleCancelCreateNote}>キャンセル</MDTextButton>
-					<MDFilledButton onClick={handleConfirmCreateNote}>作成</MDFilledButton>
+					<MDTextButton onClick={handleCancelCreateNote}>
+						{t("Sidebar.cancel", "キャンセル")}
+					</MDTextButton>
+					<MDFilledButton onClick={handleConfirmCreateNote}>
+						{t("Sidebar.create", "作成")}
+					</MDFilledButton>
 				</div>
 			</MDDialog>
 
@@ -341,24 +399,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
 				open={deleteDialogOpen}
 				type="confirm"
 				onClose={handleCancelDelete}
-				onCancel={handleCancelDelete}>
-				<div slot="headline">ノートを削除</div>
+				onCancel={handleCancelDelete}
+			>
+				<div slot="headline">
+					{t("Sidebar.deleteNote", "ノートを削除")}
+				</div>
 				<MDIcon slot="icon">delete_outline</MDIcon>
 				<form id="form" slot="content" method="dialog">
 					{noteToDeleteInfo && (
 						<>
-							<p>次のノートを削除してもよろしいですか？</p>
 							<p>
-								<strong>{noteToDeleteInfo.title || "無題のノート"}</strong>
+								{t(
+									"Sidebar.deleteConfirm",
+									"次のノートを削除してもよろしいですか？",
+								)}
 							</p>
-							<p>この操作は取り消せません。</p>
+							<p>
+								<strong>
+									{noteToDeleteInfo.title || "無題のノート"}
+								</strong>
+							</p>
+							<p>
+								{t(
+									"Sidebar.deleteIrreversible",
+									"この操作は取り消せません。",
+								)}
+							</p>
 						</>
 					)}
 				</form>
 				<div slot="actions">
-					<MDTextButton onClick={handleConfirmDelete}>削除</MDTextButton>
+					<MDTextButton onClick={handleConfirmDelete}>
+						{t("Sidebar.delete", "削除")}
+					</MDTextButton>
 					<MDFilledTonalButton onClick={handleCancelDelete} autoFocus>
-						キャンセル
+						{t("Sidebar.cancel", "キャンセル")}
 					</MDFilledTonalButton>
 				</div>
 			</MDDialog>

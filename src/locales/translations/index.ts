@@ -5,5 +5,5 @@
  * https://opensource.org/licenses/MIT
  */
 
-export { StorageService, storageService } from "./storageService";
-export { NoteService, noteService } from "./noteService";
+import { ja } from "./ja";
+export { ja };

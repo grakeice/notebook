@@ -51,14 +51,16 @@ export class Note implements INote {
 		this.dateLastModified = new Date();
 	}
 
-	get summaryText() {
+	get summaryText(): string {
 		try {
 			const content = this.content as {
-				root: { children: Array<{ children: Array<{ text: string }> }> };
+				root: {
+					children: Array<{ children: Array<{ text: string }> }>;
+				};
 			};
 
 			// より安全な型チェックを追加
-			if (!content?.root?.children?.[0]?.children) {
+			if (content?.root?.children?.[0]?.children) {
 				return "";
 			}
 
@@ -67,7 +69,7 @@ export class Note implements INote {
 					(child) =>
 						typeof child === "object" &&
 						"text" in child &&
-						typeof child.text === "string"
+						typeof child.text === "string",
 				)
 				.map((v) => v.text)
 				.join("");

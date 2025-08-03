@@ -5,5 +5,4 @@
  * https://opensource.org/licenses/MIT
  */
 
-export { StorageService, storageService } from "./storageService";
-export { NoteService, noteService } from "./noteService";
+export type { Dictionary } from "./Dictionary";

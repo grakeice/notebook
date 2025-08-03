@@ -21,7 +21,9 @@ const MDFilledButton = ({ children, ...props }) => {
 };
 
 const MDFilledTonalButton = ({ children, ...props }) => {
-	return <md-filled-tonal-button {...props}>{children}</md-filled-tonal-button>;
+	return (
+		<md-filled-tonal-button {...props}>{children}</md-filled-tonal-button>
+	);
 };
 
 const MDOutlinedButton = ({ children, ...props }) => {
@@ -213,7 +215,9 @@ const MDFilledTextField = ({ children, ...props }) => {
 };
 
 const MDOutlinedTextField = ({ children, ...props }) => {
-	return <md-outlined-text-field {...props}>{children}</md-outlined-text-field>;
+	return (
+		<md-outlined-text-field {...props}>{children}</md-outlined-text-field>
+	);
 };
 
 // Tooltip Components
@@ -229,79 +233,60 @@ export {
 	MDFilledTonalButton,
 	MDOutlinedButton,
 	MDTextButton,
-
 	// FAB Components
 	MDBrandedFab,
 	MDFab,
-
 	// Checkbox Components
 	MDCheckbox,
-
 	// Chip Components
 	MDAssistChip,
 	MDChipSet,
 	MDFilterChip,
 	MDInputChip,
 	MDSuggestionChip,
-
 	// Dialog Components
 	MDDialog,
-
 	// Divider Components
 	MDDivider,
-
 	// Elevation Components
 	MDElevation,
-
 	// Focus Ring Components
 	MDFocusRing,
-
 	// Icon Components
 	MDIcon,
 	MDIconButton,
 	MDFilledIconButton,
 	MDFilledTonalIconButton,
 	MDOutlinedIconButton,
-
 	// List Components
 	MDList,
 	MDListItem,
-
 	// Menu Components
 	MDMenu,
 	MDMenuItem,
 	MDSubMenu,
-
 	// Progress Components
 	MDCircularProgress,
 	MDLinearProgress,
-
 	// Radio Components
 	MDRadio,
-
 	// Ripple Components
 	MDRipple,
-
 	// Select Components
 	MDFilledSelect,
 	MDOutlinedSelect,
 	MDSelectOption,
-
 	// Slider Components
 	MDSlider,
-
 	// Switch Components
 	MDSwitch,
-
 	// Tabs Components
 	MDPrimaryTab,
 	MDSecondaryTab,
 	MDTabs,
-
 	// Text Field Components
 	MDFilledTextField,
 	MDOutlinedTextField,
-
 	// Tooltip Components
 	MDTooltip,
 };

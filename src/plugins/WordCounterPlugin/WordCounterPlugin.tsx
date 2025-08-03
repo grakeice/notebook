@@ -1,13 +1,12 @@
 /**
  * Copyright (c) 2025 grakeice
- * 
+ *
  * This software is released under the MIT License.
  * https://opensource.org/licenses/MIT
  */
 
 import type { WordCounterPluginProps } from "./utils/WordCounterPluginUtil";
 import styles from "./WordCounterPlugin.module.css";
-
 
 export const WordCounterPlugin: React.FC<WordCounterPluginProps> = ({
 	wordCount,
@@ -20,4 +19,3 @@ export const WordCounterPlugin: React.FC<WordCounterPluginProps> = ({
 		</div>
 	);
 };
-

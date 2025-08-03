@@ -27,8 +27,9 @@ import {
 	type SerializedEditorState,
 } from "lexical";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDebounce } from "react-use";
-import { Note } from "../../core/models";
+import type { Note } from "../../core/models";
 import { noteService } from "../../core/services";
 import { EditorHeaderPlugin } from "../../plugins/EditorHeaderPlugin";
 import { ToolbarPlugin } from "../../plugins/ToolbarPlugin";
@@ -36,6 +37,7 @@ import { WordCounterPlugin } from "../../plugins/WordCounterPlugin";
 import { countWords } from "../../plugins/WordCounterPlugin/utils";
 import { MDIcon, MDIconButton } from "../MDC";
 import styles from "./Editor.module.css";
+import "../../i18n";
 
 interface EditorProps {
 	selectedNote?: Note | null;
@@ -52,6 +54,7 @@ export const Editor: React.FC<EditorProps> = ({
 	isMobile = false,
 	showInMobile = true,
 }) => {
+	const { t } = useTranslation();
 	const [currentNote, setCurrentNote] = useState<Note | null>(null);
 	const [titleValue, setTitleValue] = useState<string>("");
 	const [wordCount, setWordCount] = useState({ characters: 0, words: 0 });
@@ -73,20 +76,25 @@ export const Editor: React.FC<EditorProps> = ({
 		const savePreviousNote = async () => {
 			if (previousNoteRef.current && currentEditorStateRef.current) {
 				// 削除されたノートは保存しない
-				if (deletedNoteId && previousNoteRef.current.ID === deletedNoteId) {
-					console.log(`Skipping save for deleted note: ${deletedNoteId}`);
+				if (
+					deletedNoteId &&
+					previousNoteRef.current.ID === deletedNoteId
+				) {
+					console.log(
+						`Skipping save for deleted note: ${deletedNoteId}`,
+					);
 					return;
 				}
 
 				try {
 					previousNoteRef.current.updateContent(
-						currentEditorStateRef.current.toJSON()
+						currentEditorStateRef.current.toJSON(),
 					);
 					const message = await noteService.saveNoteIfChanged(
-						previousNoteRef.current
+						previousNoteRef.current,
 					);
 					console.log(
-						`ID: ${message.id}\nSaved: ${message.saved}\nReason: ${message.reason}`
+						`ID: ${message.id}\nSaved: ${message.saved}\nReason: ${message.reason}`,
 					);
 				} catch (error) {
 					console.error("Failed to save previous note:", error);
@@ -109,7 +117,7 @@ export const Editor: React.FC<EditorProps> = ({
 
 	// エディターステートの妥当性をチェックする関数
 	const getValidEditorState = (
-		content: SerializedEditorState | Record<string, unknown> | undefined
+		content: SerializedEditorState | Record<string, unknown> | undefined,
 	): string | undefined => {
 		if (!content) return undefined;
 
@@ -119,8 +127,7 @@ export const Editor: React.FC<EditorProps> = ({
 				const parsed = JSON.parse(content);
 				// root要素とchildrenが存在するかチェック
 				if (
-					parsed.root &&
-					parsed.root.children &&
+					parsed.root?.children &&
 					Array.isArray(parsed.root.children)
 				) {
 					return content;
@@ -134,8 +141,7 @@ export const Editor: React.FC<EditorProps> = ({
 
 				// 有効なエディターステートの構造をチェック
 				if (
-					parsed.root &&
-					parsed.root.children &&
+					parsed.root?.children &&
 					Array.isArray(parsed.root.children)
 				) {
 					return contentStr;
@@ -152,7 +158,14 @@ export const Editor: React.FC<EditorProps> = ({
 	const initialConfig = {
 		namespace: "Editor",
 		onError: (error: Error) => console.error(error),
-		nodes: [HeadingNode, CodeNode, QuoteNode, ListNode, ListItemNode, LinkNode],
+		nodes: [
+			HeadingNode,
+			CodeNode,
+			QuoteNode,
+			ListNode,
+			ListItemNode,
+			LinkNode,
+		],
 		theme: {
 			list: {
 				nested: {
@@ -175,16 +188,17 @@ export const Editor: React.FC<EditorProps> = ({
 
 			try {
 				currentNote.updateContent(editorState.toJSON());
-				const message = await noteService.saveNoteIfChanged(currentNote);
+				const message =
+					await noteService.saveNoteIfChanged(currentNote);
 				console.log(
-					`ID: ${message.id}\nSaved: ${message.saved}\nReason: ${message.reason}`
+					`ID: ${message.id}\nSaved: ${message.saved}\nReason: ${message.reason}`,
 				);
 			} catch (error) {
 				console.error("Failed to save note:", error);
 			}
 		},
 		1000,
-		[currentEditorStateRef.current]
+		[currentEditorStateRef.current],
 	);
 
 	const handleEditorChange = (editorState: EditorState) => {
@@ -207,7 +221,9 @@ export const Editor: React.FC<EditorProps> = ({
 
 			// タイトルの差分チェック
 			if (title === currentNote.title) {
-				console.log(`No title change detected for note: ${currentNote.ID}`);
+				console.log(
+					`No title change detected for note: ${currentNote.ID}`,
+				);
 				return;
 			}
 
@@ -220,7 +236,7 @@ export const Editor: React.FC<EditorProps> = ({
 			}
 		},
 		1000,
-		[titleValue]
+		[titleValue],
 	);
 
 	// currentNoteがない場合の表示
@@ -229,19 +245,28 @@ export const Editor: React.FC<EditorProps> = ({
 			<div
 				className={`${styles.editor} ${
 					isMobile && !showInMobile ? styles.mobileHidden : ""
-				}`}>
+				}`}
+			>
 				{isMobile && (
 					<div className={styles.mobileHeader}>
-						<MDIconButton onClick={onBackToSidebar} title="ノート一覧に戻る">
+						<MDIconButton
+							onClick={onBackToSidebar}
+							title={t("Sidebar.backToList", "ノート一覧に戻る")}
+						>
 							<MDIcon>arrow_back</MDIcon>
 						</MDIconButton>
-						<span>ノート</span>
+						<span>{t("Sidebar.notes", "ノート")}</span>
 					</div>
 				)}
 				<div className={styles.placeholder}>
-					<h2>ノートを選択してください</h2>
+					<h2>
+						{t("Editor.noteSelect", "ノートを選択してください")}
+					</h2>
 					<p>
-						左のサイドバーからノートを選択するか、新しいノートを作成してください。
+						{t(
+							"Editor.selectOrCreate",
+							"左のサイドバーからノートを選択するか、新しいノートを作成してください。",
+						)}
 					</p>
 				</div>
 			</div>
@@ -252,10 +277,14 @@ export const Editor: React.FC<EditorProps> = ({
 		<div
 			className={`${styles.editor} ${
 				isMobile && !showInMobile ? styles.mobileHidden : ""
-			}`}>
+			}`}
+		>
 			{isMobile && (
 				<div className={styles.mobileHeader}>
-					<MDIconButton onClick={onBackToSidebar} title="ノート一覧に戻る">
+					<MDIconButton
+						onClick={onBackToSidebar}
+						title="ノート一覧に戻る"
+					>
 						<MDIcon>arrow_back</MDIcon>
 					</MDIconButton>
 					<span>{currentNote.title || "無題のノート"}</span>
